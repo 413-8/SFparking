@@ -28,6 +28,8 @@ import com.google.android.gms.maps.model.CameraPosition;
 
 public class MapsActivity extends FragmentActivity implements OnMapLongClickListener, OnInfoWindowClickListener{
 
+    //This is a comment
+
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     String longitude;
     String latitude;
