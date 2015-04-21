@@ -44,8 +44,6 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         setUpMapIfNeeded();
 
 
-
-
     }
 
     @Override
@@ -108,9 +106,14 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
 
 
-
+    //the i parked here button
     Button b1 = (Button) findViewById(R.id.park);
 
+        /**
+         * gets the location of the device and places a marker at that location once the button
+         * is pressed.
+         * If unable to get location, prints toast message to notify user.
+         */
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -144,7 +147,13 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         //mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
     }
 
-
+    /**
+     * on a click-and-hold, a marker shall be placed on the map.
+     * the device will then make a request from the SFPark server for information about
+     * the location.
+     * this information will appear in an info window above the location.
+     * @param latLng the object holding data for latitude and longitude.
+     */
     @Override
     public void onMapLongClick(LatLng latLng) {
 
@@ -184,7 +193,9 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
     }
 
 
-
+    /**
+     * recenters the google map view on the user's location.
+     */
     public void centerMapOnMyLocation(){
 
         Location currentLocation = getMyLocation();
@@ -207,12 +218,17 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
     }
 
+    /**
+     * retrieves data about the user's location from the GPS provider on the device's phone.
+     * if location wasn't found, check the next most accurate place for the current location.
+     * Otherwise, try GoogleMaps Location.
+     * @return the device's current location
+     */
     private Location getMyLocation() {
-        // Get location from GPS if it's available
+
         LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         Location myLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-        // Location wasn't found, check the next most accurate place for the current location
         if (myLocation == null) {
             Criteria criteria = new Criteria();
             criteria.setAccuracy(Criteria.ACCURACY_COARSE);
@@ -221,7 +237,6 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
             // Use the provider to get the last known location
             myLocation = lm.getLastKnownLocation(provider);
 
-            // try GoogleMaps Location
             myLocation = mMap.getMyLocation();
         }
 
