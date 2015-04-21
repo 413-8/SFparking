@@ -148,7 +148,7 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
     }
 
     /**
-     * on a click-and-hold, a marker shall be placed on the map.
+     * on a click-and-hold, a marker shall be placed on th map.
      * the device will then make a request from the SFPark server for information about
      * the location.
      * this information will appear in an info window above the location.
