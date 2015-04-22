@@ -112,6 +112,9 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
     //the i parked here button
     Button b1 = (Button) findViewById(R.id.park);
+    //Button for clear the map
+    Button b2 = (Button) findViewById(R.id.clear);
+
 
         /**
          * gets the location of the device and places a marker at that location once the button
@@ -142,6 +145,14 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
             }
         });
+
+        b2.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View z){
+                mMap.clear();
+            }
+        });
+
         centerMapOnMyLocation();
     }
 
