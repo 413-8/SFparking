@@ -42,7 +42,7 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
     String longitude;
     String latitude;
-    String radius = "0.5";
+    String radius = "0.007"; // aprox. 37ft for accuracy
 
 
     String response;
