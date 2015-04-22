@@ -3,6 +3,7 @@ package com.example.ronald.sfparking;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +20,7 @@ import java.util.Objects;
 public class httpRequest extends AsyncTask{
 
     private Context context;
+    InputStream in;
 
     public httpRequest(Context context){
         this.context = context;
@@ -44,7 +46,7 @@ public class httpRequest extends AsyncTask{
 
             conn.connect();
 
-            InputStream in = conn.getInputStream();
+            in = conn.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
             String data = null;
@@ -54,12 +56,12 @@ public class httpRequest extends AsyncTask{
             }
             return webPage;
 
+
+
         } catch (Exception e){
             return new String("Exception: " + e.getMessage());
         }
     }
-
     protected void onPreExecute(){ checkInternetConnection();}
-
 
 }

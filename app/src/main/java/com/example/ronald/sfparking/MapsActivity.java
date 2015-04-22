@@ -24,19 +24,28 @@ import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 
-public class MapsActivity extends FragmentActivity implements OnMapLongClickListener, OnInfoWindowClickListener{
+public class MapsActivity extends FragmentActivity implements OnMapLongClickListener{
 
     //This is a comment.
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    Marker mymarker;
+
+
+
     String longitude;
     String latitude;
     String radius = "0.5";
 
 
-    String response = "";
+    String response;
 
 
     @Override
@@ -99,13 +108,12 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         uiSettings.setCompassEnabled(true);
         uiSettings.setZoomControlsEnabled(true);
 
+        /* setting up an invisible marker in order to remove it on the first call of onMapLongClick */
+        mymarker = mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(0,0))
+                .visible(false));
+
         mMap.setOnMapLongClickListener(this);
-
-
-
-
-
-
 
 
     //the i parked here button
@@ -121,7 +129,6 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
             public void onClick(View v) {
 
                 Location c = getMyLocation();
-
 
                 if(c != null) {
                     LatLng l = new LatLng(c.getLatitude(), c.getLongitude());
@@ -141,12 +148,7 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
             }
         });
-
         centerMapOnMyLocation();
-
-
-
-        //mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
     }
 
     /**
@@ -158,41 +160,55 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
      */
     @Override
     public void onMapLongClick(LatLng latLng) {
+        /* removes previous marker */
+        if(mymarker.isVisible())
+            mymarker.remove();
+
+        longitude = Double.toString(latLng.longitude);
+        latitude = Double.toString(latLng.latitude);
 
 
-           longitude = Double.toString(latLng.longitude);
-           latitude = Double.toString(latLng.latitude);
-
-           URLMaker temp = URLMaker.getInstance();
-           String url = temp.makeURL(latitude, longitude, radius);
+        URLMaker temp = URLMaker.getInstance();
+        String url = temp.makeURL(latitude, longitude, radius);
 
         Log.d("mytag ", url);
 
+        /* request sfpark api */
         AsyncTask task = new httpRequest(this).execute(url);
+        InputStream stream = null;
+        SFParkXmlParser sfparkParser = new SFParkXmlParser();
+        ParkLocation parkLoc = null;
 
         try{
             response = task.get().toString();
+
         } catch (Exception e){e.printStackTrace();}
 
 
-        System.out.println(response);
 
-        Log.d("mytag", response);
+        String StreetName = "";
+        String OnOffSt = "";
 
 
-        mMap.addMarker(new MarkerOptions()
+        stream = new ByteArrayInputStream(response.getBytes());
+        try {
+
+            parkLoc = sfparkParser.parse(stream);
+            StreetName = parkLoc.stName;
+            OnOffSt = parkLoc.onOffStreet;
+
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        mymarker = mMap.addMarker(new MarkerOptions()
                 .position(latLng)
-                .title("You are here")
-                .snippet(response));
-
+                .title(StreetName)
+                .snippet("Street: " + OnOffSt));
     }
 
-    @Override
-    public void onInfoWindowClick(Marker marker) {
-
-
-
-    }
 
 
     /**
