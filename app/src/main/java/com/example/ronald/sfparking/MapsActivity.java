@@ -33,20 +33,14 @@ import java.io.InputStream;
 
 public class MapsActivity extends FragmentActivity implements OnMapLongClickListener{
 
-    //This is a comment.
-
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     Marker mymarker;
-
-
 
     String longitude;
     String latitude;
     String radius = "0.007"; // aprox. 37ft for accuracy
 
-
     String response;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
