@@ -17,6 +17,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Objects;
 
+/*
+    makes an http request through the internet and reads the text on that page into a buffer.
+*/
 public class httpRequest extends AsyncTask{
 
     private Context context;
@@ -36,6 +39,15 @@ public class httpRequest extends AsyncTask{
             Toast.makeText(context, "Not connected to internet", Toast.LENGTH_SHORT).show();
     }
 
+
+    /*
+     * the method accepts the URL to be used as its first paramter.
+     * doInBackground opens an internet connection, 
+     * reads the text on the resulting page on the url to a buffer.
+     * after reading a line, it appends it to the String webPage, 
+     * which will hold the text of the webpage
+     * @return the String of text that is the webpage.
+     */
     @Override
     protected Object doInBackground(Object[] params) {
 
