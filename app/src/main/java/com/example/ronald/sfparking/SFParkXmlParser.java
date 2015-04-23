@@ -10,6 +10,12 @@ import java.io.InputStream;
 
 /**
  * Created by Pedro on 4/21/2015.
+ * The parser class that will parse the response from the SFPark server.
+ * it will search for NAME, TYPE, and RATES id tags and store information 
+ *  parse returns a ParkLocation object, with relevent data fields filled if applicable.
+ * readFeed takes an XMLparser as an input and if it finds an entry, it will call the readParkLocation method.
+ * -readParkLocation looks for the tags for different information in the xml file and sets the data fields 
+ * of the ParkLocation Object.  @return the ParkLocation object.
  */
 public class SFParkXmlParser {
 
