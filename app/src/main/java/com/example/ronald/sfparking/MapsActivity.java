@@ -34,7 +34,7 @@ import java.io.InputStream;
 public class MapsActivity extends FragmentActivity implements OnMapLongClickListener{
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-    Marker mymarker;
+    private Marker mymarker;
 
     String longitude;
     String latitude;
@@ -102,11 +102,6 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         uiSettings.setCompassEnabled(true);
         uiSettings.setZoomControlsEnabled(true);
 
-        /* setting up an invisible marker in order to remove it on the first call of onMapLongClick */
-        mymarker = mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(0,0))
-                .visible(false));
-
         mMap.setOnMapLongClickListener(this);
 
 
@@ -165,8 +160,8 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
      */
     @Override
     public void onMapLongClick(LatLng latLng) {
-        /* removes previous marker */
-        if(mymarker.isVisible())
+        /* removes previous marker if exists */
+        if(mymarker != null)
             mymarker.remove();
 
         longitude = Double.toString(latLng.longitude);
@@ -175,8 +170,6 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
         URLMaker temp = URLMaker.getInstance();
         String url = temp.makeURL(latitude, longitude, radius);
-
-        Log.d("mytag ", url);
 
         /* request sfpark api */
         AsyncTask task = new httpRequest(this).execute(url);
@@ -190,11 +183,10 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         } catch (Exception e){e.printStackTrace();}
 
 
-
         String StreetName = "";
         String OnOffSt = "";
 
-
+        /* parse response from SF park */
         stream = new ByteArrayInputStream(response.getBytes());
         try {
 
@@ -208,6 +200,7 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
                 e.printStackTrace();
             }
 
+        /* add marker to the map */
         mymarker = mMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .title(StreetName)
