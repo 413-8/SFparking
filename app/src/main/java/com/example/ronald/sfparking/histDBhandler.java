@@ -58,8 +58,17 @@ public class histDBhandler extends SQLiteOpenHelper{
         onCreate(db);
     }
 
-    // Adding new contact
-    public void addContact(Location contact) {}
+    /* Adding new contact
+    public void addLocation(Location contact) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Location values = new Location();
+        values.(KEY_NAME, contact.getName()); // Contact Name
+        values.put(KEY_PH_NO, contact.getPhoneNumber()); // Contact Phone Number
+
+        // Inserting Row
+        db.insert(TABLE_CONTACTS, null, values);
+        db.close(); // Closing database connection
+    }
      
     // Getting single contact
     public Location getContact(int id) {}
@@ -73,7 +82,7 @@ public class histDBhandler extends SQLiteOpenHelper{
     public int updateContact(Location contact) {}
     // Deleting single contact
     public void deleteContact(Location contact) {}
-
+*/
 
 
 }

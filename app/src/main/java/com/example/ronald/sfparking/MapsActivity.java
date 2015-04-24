@@ -11,7 +11,10 @@ import android.location.LocationManager;
 import android.location.Criteria;
 import android.content.Context;
 import android.widget.Toast;
+import android.widget.TextView;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -111,10 +114,11 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
     Button b2 = (Button) findViewById(R.id.clear);
 
 
-        /**
+        /** I PARKED HERE BUTTON
          * gets the location of the device and places a marker at that location once the button
          * is pressed.
          * If unable to get location, prints toast message to notify user.
+         * TODO: once Lat Lng is set, store it as a location in the historyDB.
          */
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -152,7 +156,7 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
     }
 
     /**
-     * on a click-and-hold, a marker shall be placed on th map.
+     * on a click-and-hold, a marker shall be placed on the map.
      * the device will then make a request from the SFPark server for information about
      * the location.
      * this information will appear in an info window above the location.

@@ -19,4 +19,16 @@ public class ParkLocation {
         this.stName = stName;
         this.rates = rates;
     }
+
+    public String getOnOffStreet(){
+        return onOffStreet;
+    }
+
+    public String getStName(){
+        return stName;
+    }
+
+    public String getRates(){
+        return rates;
+    }
 }
