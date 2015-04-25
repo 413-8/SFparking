@@ -5,7 +5,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-
+/**
+ * Created by Toren on 4/25/2015
+ * Purpose: The activity will display the saved parking location(s) saved in the SQLite database to the user
+ */
 public class SavedLocations extends ActionBarActivity {
 
     @Override
@@ -15,12 +18,12 @@ public class SavedLocations extends ActionBarActivity {
     }
 
 
-    @Override
+/*    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_saved_locations, menu);
         return true;
-    }
+    }*/
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
