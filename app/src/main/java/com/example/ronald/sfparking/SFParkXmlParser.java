@@ -22,6 +22,13 @@ public class SFParkXmlParser {
     //no namespaces
     private static final String ns = null;
 
+    /**
+     * sets up the parser to be sent to readfeed method
+     * @param in the input stream to be used for the parser
+     * @return the return of the readfeed method.
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
     public static ParkLocation parse(InputStream in) throws XmlPullParserException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
@@ -34,7 +41,15 @@ public class SFParkXmlParser {
         }
     }
 
-    // looks for AVL tag
+
+    /**
+     * looks for AVL tag in XML file.  If success, calls readParkLocation to fill out the ParkLocation
+     * object entry.
+     * @param parser the XmlPullParser to be used
+     * @return the new ParkLocation that has been filled in by readParkLocation(parser).
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
     private static ParkLocation readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {
         ParkLocation entry = new ParkLocation();
 
@@ -55,7 +70,15 @@ public class SFParkXmlParser {
         return entry;
     }
 
-    // looks for TYPE, NAME and RATES tags
+    //
+
+    /**
+     * looks for TYPE, NAME and RATES tags and then sets those fields in a new ParkLocation object.
+     * @param parser the XmlPullParser to be used
+     * @return A new location object with fields filled in by data from the xml file.
+     * @throws XmlPullParserException if the parser fails.
+     * @throws IOException if it can't read the file.
+     */
     private static ParkLocation readParkLocation(XmlPullParser parser)
             throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "AVL");
@@ -80,7 +103,13 @@ public class SFParkXmlParser {
         return new ParkLocation(onOffStreet, stName, rates);
     }
 
-    // process TYPE tags in the feed
+    /**
+     * process TYPE tags in the feed.
+     * @param parser the XmlPullParser to be used
+     * @return the String tagged by TYPE.
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
     private static String readType(XmlPullParser parser) throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "TYPE");
         String type = readText(parser);
@@ -88,7 +117,15 @@ public class SFParkXmlParser {
         return type;
     }
 
-    // process TYPE tags in the feed
+    //
+
+    /**
+     * process TYPE tags in the feed
+     * @param parser the XmlPullParser to be used
+     * @return the String tagged by NAME.
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
     private static String readName(XmlPullParser parser) throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "NAME");
         String name = readText(parser);
@@ -96,7 +133,15 @@ public class SFParkXmlParser {
         return name;
     }
 
-    // get TEXT from tags we need
+    //
+
+    /**
+     * process TEXT tags in the feed.
+     * @param parser the XmlPullParser to be used
+     * @return the String tagged by TEXT.
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
     private static String readText(XmlPullParser parser) throws XmlPullParserException, IOException {
         String result = "";
         if (parser.next() == XmlPullParser.TEXT) {
@@ -107,6 +152,13 @@ public class SFParkXmlParser {
     }
 
     // skip tags we don't need
+
+    /**
+     * skip unneeded tags.
+     * @param parser the XmlPullParser to be used
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
     private static void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
         if (parser.getEventType() != XmlPullParser.START_TAG) {
             throw new IllegalStateException();
