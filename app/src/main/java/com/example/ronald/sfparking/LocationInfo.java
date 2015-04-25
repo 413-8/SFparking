@@ -2,6 +2,7 @@ package com.example.ronald.sfparking;
 
 /**
  * Created by Dylan on 4/24/2015.
+ * This class holds data about the current location.
  */
 public class LocationInfo {
     private double longitude, latitude;

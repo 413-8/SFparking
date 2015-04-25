@@ -15,6 +15,8 @@ import java.net.URL;
 
 /*
     makes an http request through the internet and reads the text on that page into a buffer.
+    parkLoc is the location object that will hold information from the XML file retrieved over the
+    internet from the URL.
 */
 public class httpRequest extends AsyncTask<String, Void, ParkLocation>{
 
@@ -56,7 +58,14 @@ public class httpRequest extends AsyncTask<String, Void, ParkLocation>{
         return temp;
     }
 
-    // Downloads XML from api.sfpark.org and parses it.
+
+    /**
+     * Downloads XML from api.sfpark.org and parses it.
+     * @param urlString the URL to use in the request from the network.
+     * @return the location object with data filled in by SFParkXmlParser object.
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
     private ParkLocation loadXmlFromNetwork(String urlString)
             throws XmlPullParserException, IOException {
         InputStream stream = null;
@@ -74,8 +83,13 @@ public class httpRequest extends AsyncTask<String, Void, ParkLocation>{
         return parkLoc;
     }
 
-    // Given a string representation of a URL,
-    // sets up a connection and gets an input stream.
+    /**
+     *  Given a string representation of a URL,
+     * sets up a connection and gets an input stream.
+     * @param urlString the string that represents the URL.
+     * @return return value of HttpURLConnection.getInputStream().
+     * @throws IOException
+     */
     private InputStream downloadUrl(String urlString) throws IOException {
         URL url = new URL(urlString);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -87,7 +101,7 @@ public class httpRequest extends AsyncTask<String, Void, ParkLocation>{
         conn.connect();
         return conn.getInputStream();
     }
-
+    //checks internet connection before proceeding with execution.
     protected void onPreExecute(){ checkInternetConnection();}
 
 }

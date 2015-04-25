@@ -34,7 +34,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-
+/**
+ * The main method of the application.
+ */
 public class MapsActivity extends FragmentActivity implements OnMapLongClickListener{
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
@@ -52,7 +54,6 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         setUpMapIfNeeded();
-
 
     }
 

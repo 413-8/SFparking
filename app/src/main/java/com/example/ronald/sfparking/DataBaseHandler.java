@@ -12,6 +12,7 @@ import java.util.List;
 
 /**
  * Created by Dylan on 4/24/2015.
+ * Sets up and creates the SQLite database for the phone.
  */
 public class DataBaseHandler extends SQLiteOpenHelper {
 
