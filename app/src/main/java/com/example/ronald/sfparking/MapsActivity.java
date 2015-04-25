@@ -41,7 +41,7 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
     String longitude;
     String latitude;
-    String radius = "0.007"; // aprox. 37ft for accuracy
+    String radius = "0.007"; // approx. 37ft for accuracy
 
     String response;
 
@@ -108,13 +108,15 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         mMap.setOnMapLongClickListener(this);
 
 
-    //the i parked here button
+    //"I Parked Here!" button to save data of parking location
+        //currently marks current location as the parked location
+        //@TODO make the button use the dropped pin as the parked location
     Button b1 = (Button) findViewById(R.id.park);
-    //Button for clear the map
+    //"Clear Map" button to remove dropped pin from map view
     Button b2 = (Button) findViewById(R.id.clear);
 
 
-        /** I PARKED HERE BUTTON
+        /** "I PARKED HERE" button behavior
          * gets the location of the device and places a marker at that location once the button
          * is pressed.
          * If unable to get location, prints toast message to notify user.
