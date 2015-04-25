@@ -92,8 +92,8 @@ public class DataBaseHandler extends SQLiteOpenHelper {
     /**
      * A cursor is made that points to the row associated with an id in the table.
      * a LocationInfo object is created and modified.
-     * @param id
-     * @return
+     * @param id the id of the row requested.
+     * @return the locationinfo object that holds the information in the requested row.
      */
     public LocationInfo getLocationInfo(int id){
         SQLiteDatabase db = getReadableDatabase();
@@ -110,12 +110,20 @@ public class DataBaseHandler extends SQLiteOpenHelper {
 
     }
 
+    /**
+     * Uses the id of the LocationInfo object to find it in the table, and deletes the row its in.
+     * @param locationInfo the object to be removed from the table.
+     */
     public void deleteLocationInfo(LocationInfo locationInfo){
         SQLiteDatabase db = getWritableDatabase();
         db.delete(TABLE_LOCATIONS,KEY_ID + "=?", new String[] {String.valueOf(locationInfo.getId())});
         db.close();
     }
 
+    /**
+     * Retrieves number of entries in the table
+     * @return the number of entries in the table.
+     */
     public  int getLocationInfoCount() {
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM" + TABLE_LOCATIONS,null);
@@ -126,6 +134,11 @@ public class DataBaseHandler extends SQLiteOpenHelper {
 
     }
 
+    /**
+     * Replace the information in a row with a new LocationInfo object
+     * @param locationinfo the LocationInfo object to be added
+     * @return see return value for SQLiteDatabase.update
+     */
     public int updateLocationInfo(LocationInfo locationinfo) {
         SQLiteDatabase db = getWritableDatabase();
 
@@ -139,6 +152,11 @@ public class DataBaseHandler extends SQLiteOpenHelper {
 
         return db.update(TABLE_LOCATIONS, values, KEY_ID + "=?", new String[]{String.valueOf(locationinfo.getId())});
     }
+
+    /**
+     * Retrieves all the rows in the table and puts them in an ArrayList to be returned
+     * @return the List of LocationInfo objects in the database.
+     */
     public List<LocationInfo> getAllLocationInfo(){
         List<LocationInfo> locationInfo  = new ArrayList<LocationInfo>();
         SQLiteDatabase db = getWritableDatabase();
