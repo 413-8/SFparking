@@ -1,5 +1,6 @@
 package com.example.ronald.sfparking;
 
+import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
@@ -54,7 +55,6 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         setUpMapIfNeeded();
-
     }
 
     @Override
@@ -112,12 +112,15 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         mMap.setOnMapLongClickListener(this);
 
 
-    //"I Parked Here!" button to save data of parking location
+        //"I Parked Here!" button to save data of parking location
         //currently marks current location as the parked location
         //@TODO make the button use the dropped pin as the parked location
-    Button b1 = (Button) findViewById(R.id.park);
-    //"Clear Map" button to remove dropped pin from map view
-    Button b2 = (Button) findViewById(R.id.clear);
+        Button b1 = (Button) findViewById(R.id.park);
+        //"Clear Map" button to remove dropped pin from map view
+        Button b2 = (Button) findViewById(R.id.clear);
+        //"History" button to switch to history activity
+        Button b3 = (Button) findViewById(R.id.history);
+
 
 
         /** "I PARKED HERE" button behavior
@@ -157,7 +160,17 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
                 mMap.clear();
             }
         });
+
+        //b3.setOnClickListener(this);
+        b3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(".SavedLocations"));
+            }
+        });
+
     }
+
 
     /**
      * on a click-and-hold, a marker shall be placed on the map.
@@ -254,6 +267,8 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         URLMaker temp = URLMaker.getInstance();
         url = temp.makeURL(latitude, longitude, radius);
     }
+
+
+
+
 }
-
-
