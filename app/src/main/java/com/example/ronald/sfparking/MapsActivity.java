@@ -38,6 +38,7 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private Marker mymarker;
+    DataBaseHandler dbHandler;
 
     String longitude;
     String latitude;
@@ -50,6 +51,8 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         setUpMapIfNeeded();
+        dbHandler = new DataBaseHandler(getApplicationContext());
+
 
 
     }
@@ -127,6 +130,8 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
                 Location c = getMyLocation();
 
                 if(c != null) {
+                    LocationInfo locationInfo = new LocationInfo(dbHandler.getLocationInfoCount(),c.getLatitude(),c.getLongitude(),"off","Garfield","8:00");
+                    dbHandler.createLocation(locationInfo);
                     LatLng l = new LatLng(c.getLatitude(), c.getLongitude());
                     mMap.addMarker(new MarkerOptions()
                          .position(l)
@@ -141,6 +146,8 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
                     Toast toast = Toast.makeText(context, text, duration);
                     toast.show();
                 }
+
+
 
             }
         });
