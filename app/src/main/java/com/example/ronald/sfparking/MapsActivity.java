@@ -19,6 +19,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -38,6 +39,7 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private Marker mymarker;
+    private String url;
 
     String longitude;
     String latitude;
@@ -104,6 +106,7 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
         uiSettings.setCompassEnabled(true);
         uiSettings.setZoomControlsEnabled(true);
+        centerMapOnMyLocation();
 
         mMap.setOnMapLongClickListener(this);
 
@@ -131,7 +134,7 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
                     mMap.addMarker(new MarkerOptions()
                          .position(l)
                          .title("I park here!!!")
-
+                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
                     );
                 } else{
                     Context context = getApplicationContext();
@@ -151,8 +154,6 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
                 mMap.clear();
             }
         });
-
-        centerMapOnMyLocation();
     }
 
     /**
@@ -171,47 +172,33 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         longitude = Double.toString(latLng.longitude);
         latitude = Double.toString(latLng.latitude);
 
-
-        URLMaker temp = URLMaker.getInstance();
-        String url = temp.makeURL(latitude, longitude, radius);
-
-        /* request sfpark api */
-        AsyncTask task = new httpRequest(this).execute(url);
-        InputStream stream = null;
-        SFParkXmlParser sfparkParser = new SFParkXmlParser();
-        ParkLocation parkLoc = null;
-
-        try{
-            response = task.get().toString();
-
-        } catch (Exception e){e.printStackTrace();}
-
+        makeURLString(latitude, longitude, radius);
 
         String StreetName = "";
         String OnOffSt = "";
 
-        /* parse response from SF park */
-        stream = new ByteArrayInputStream(response.getBytes());
-        try {
-
-            parkLoc = sfparkParser.parse(stream);
+        /* request and parse sfpark api */
+        try{
+            ParkLocation parkLoc = new httpRequest(getApplicationContext()).execute(url).get();
             StreetName = parkLoc.stName;
             OnOffSt = parkLoc.onOffStreet;
+        } catch (Exception e){e.printStackTrace();}
 
-            } catch (XmlPullParserException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        /* add marker to the map */
-        mymarker = mMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .title(StreetName)
-                .snippet("Street: " + OnOffSt));
+        /* add marker to the map: green if info available, red otherwise */
+        if (StreetName.equals("No Data")) {
+            mymarker = mMap.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .title(StreetName)
+                    .snippet("Street: " + OnOffSt));
+        }
+        else {
+            mymarker = mMap.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .title(StreetName)
+                    .snippet("Street: " + OnOffSt)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+        }
     }
-
-
 
     /**
      * recenters the google map view on the user's location.
@@ -232,10 +219,7 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
                     .tilt(0)                   // Sets the tilt of the camera to 30 degrees
                     .build();                   // Creates a CameraPosition from the builder
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
         }
-
-
     }
 
     /**
@@ -263,7 +247,10 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         return myLocation;
     }
 
-
+    private void makeURLString(String latitude, String longitude, String radius) {
+        URLMaker temp = URLMaker.getInstance();
+        url = temp.makeURL(latitude, longitude, radius);
+    }
 }
 
 
