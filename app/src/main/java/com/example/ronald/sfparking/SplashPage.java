@@ -19,8 +19,8 @@ public class SplashPage extends Activity {
             public void run() {
 
                 try {
-                    // Thread will sleep for 5 seconds
-                    sleep(5000);
+                    // Thread will sleep for 1 seconds
+                    sleep(1000);
 
                 } catch (Exception e) {
                     e.printStackTrace();
