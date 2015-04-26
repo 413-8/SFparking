@@ -5,5 +5,5 @@
     <string name="xml_error">XML Error</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_saved_locations">SavedLocations</string>
+    <string name="title_activity_saved_locations">Stored Locations</string>
 </resources>
