@@ -5,15 +5,27 @@ package com.example.ronald.sfparking;
  */
 
 import android.net.Uri;
+//singleton design pattern.
 public class URLMaker {
 
     private static URLMaker instance = new URLMaker();
     private URLMaker() {}
 
+    /**
+     * retrieves the instance of URLMaker
+     * @return the instance of the URLMaker.
+     */
     public static URLMaker getInstance(){
         return instance;
     }
 
+    /**
+     * Creates a URL string for the SFPark API
+     * @param latitude the latitude of the location.
+     * @param longitude the longitude of the location.
+     * @param radius The radius of the search.
+     * @return The URL string for the SFPark API.
+     */
     public String makeURL (String latitude, String longitude, String radius) {
 
         String mile = "mile";

@@ -2,11 +2,15 @@ package com.example.ronald.sfparking;
 
 /**
  * Created by Dylan on 4/24/2015.
+ * This class holds data about the current location.
  */
 public class LocationInfo {
     private double longitude, latitude;
     private String time, street_name, on_off_street;
     private int id;
+
+    public LocationInfo(){};
+
     public LocationInfo(int _id, double _latitude, double _longitude, String _on_off_street,  String _street_name, String _time){
         time = _time;
         street_name = _street_name;

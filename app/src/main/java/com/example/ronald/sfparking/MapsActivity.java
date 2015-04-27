@@ -1,5 +1,6 @@
 package com.example.ronald.sfparking;
 
+import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
@@ -19,6 +20,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -33,16 +35,18 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-
+/**
+ * The main method of the application.
+ */
 public class MapsActivity extends FragmentActivity implements OnMapLongClickListener{
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private Marker mymarker;
-    DataBaseHandler dbHandler;
+    private String url;
 
     String longitude;
     String latitude;
-    String radius = "0.007"; // aprox. 37ft for accuracy
+    String radius = "0.007"; // approx. 37ft for accuracy
 
     String response;
 
@@ -51,10 +55,6 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         setUpMapIfNeeded();
-        dbHandler = new DataBaseHandler(getApplicationContext());
-
-
-
     }
 
     @Override
@@ -107,17 +107,23 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
         uiSettings.setCompassEnabled(true);
         uiSettings.setZoomControlsEnabled(true);
+        centerMapOnMyLocation();
 
         mMap.setOnMapLongClickListener(this);
 
 
-    //the i parked here button
-    Button b1 = (Button) findViewById(R.id.park);
-    //Button for clear the map
-    Button b2 = (Button) findViewById(R.id.clear);
+        //"I Parked Here!" button to save data of parking location
+        //currently marks current location as the parked location
+        //@TODO make the button use the dropped pin as the parked location
+        Button b1 = (Button) findViewById(R.id.park);
+        //"Clear Map" button to remove dropped pin from map view
+        Button b2 = (Button) findViewById(R.id.clear);
+        //"History" button to switch to history activity
+        Button b3 = (Button) findViewById(R.id.history);
 
 
-        /** I PARKED HERE BUTTON
+
+        /** "I PARKED HERE" button behavior
          * gets the location of the device and places a marker at that location once the button
          * is pressed.
          * If unable to get location, prints toast message to notify user.
@@ -130,13 +136,11 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
                 Location c = getMyLocation();
 
                 if(c != null) {
-                    LocationInfo locationInfo = new LocationInfo(dbHandler.getLocationInfoCount(),c.getLatitude(),c.getLongitude(),"off","Garfield","8:00");
-                    dbHandler.createLocation(locationInfo);
                     LatLng l = new LatLng(c.getLatitude(), c.getLongitude());
                     mMap.addMarker(new MarkerOptions()
                          .position(l)
                          .title("I park here!!!")
-
+                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
                     );
                 } else{
                     Context context = getApplicationContext();
@@ -146,8 +150,6 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
                     Toast toast = Toast.makeText(context, text, duration);
                     toast.show();
                 }
-
-
 
             }
         });
@@ -159,8 +161,16 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
             }
         });
 
-        centerMapOnMyLocation();
+        //b3.setOnClickListener(this);
+        b3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(".SavedLocations"));
+            }
+        });
+
     }
+
 
     /**
      * on a click-and-hold, a marker shall be placed on the map.
@@ -178,47 +188,33 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         longitude = Double.toString(latLng.longitude);
         latitude = Double.toString(latLng.latitude);
 
-
-        URLMaker temp = URLMaker.getInstance();
-        String url = temp.makeURL(latitude, longitude, radius);
-
-        /* request sfpark api */
-        AsyncTask task = new httpRequest(this).execute(url);
-        InputStream stream = null;
-        SFParkXmlParser sfparkParser = new SFParkXmlParser();
-        ParkLocation parkLoc = null;
-
-        try{
-            response = task.get().toString();
-
-        } catch (Exception e){e.printStackTrace();}
-
+        makeURLString(latitude, longitude, radius);
 
         String StreetName = "";
         String OnOffSt = "";
 
-        /* parse response from SF park */
-        stream = new ByteArrayInputStream(response.getBytes());
-        try {
-
-            parkLoc = sfparkParser.parse(stream);
+        /* request and parse sfpark api */
+        try{
+            ParkLocation parkLoc = new httpRequest(getApplicationContext()).execute(url).get();
             StreetName = parkLoc.stName;
             OnOffSt = parkLoc.onOffStreet;
+        } catch (Exception e){e.printStackTrace();}
 
-            } catch (XmlPullParserException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        /* add marker to the map */
-        mymarker = mMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .title(StreetName)
-                .snippet("Street: " + OnOffSt));
+        /* add marker to the map: green if info available, red otherwise */
+        if (StreetName.equals("No Data")) {
+            mymarker = mMap.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .title(StreetName)
+                    .snippet("Street: " + OnOffSt));
+        }
+        else {
+            mymarker = mMap.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .title(StreetName)
+                    .snippet("Street: " + OnOffSt)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+        }
     }
-
-
 
     /**
      * recenters the google map view on the user's location.
@@ -239,10 +235,7 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
                     .tilt(0)                   // Sets the tilt of the camera to 30 degrees
                     .build();                   // Creates a CameraPosition from the builder
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
         }
-
-
     }
 
     /**
@@ -270,7 +263,12 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         return myLocation;
     }
 
+    private void makeURLString(String latitude, String longitude, String radius) {
+        URLMaker temp = URLMaker.getInstance();
+        url = temp.makeURL(latitude, longitude, radius);
+    }
+
+
+
 
 }
-
-

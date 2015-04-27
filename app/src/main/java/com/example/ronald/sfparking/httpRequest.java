@@ -4,32 +4,28 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Objects;
 
 /*
     makes an http request through the internet and reads the text on that page into a buffer.
+    parkLoc is the location object that will hold information from the XML file retrieved over the
+    internet from the URL.
 */
-public class httpRequest extends AsyncTask{
+public class httpRequest extends AsyncTask<String, Void, ParkLocation>{
 
     private Context context;
-    InputStream in;
+    ParkLocation parkLoc = null;
 
     public httpRequest(Context context){
         this.context = context;
-
     }
-
 
     // Check Internet connection
     private void checkInternetConnection(){
@@ -49,31 +45,63 @@ public class httpRequest extends AsyncTask{
      * @return the String of text that is the webpage.
      */
     @Override
-    protected Object doInBackground(Object[] params) {
+    protected ParkLocation doInBackground(String... urls) {
 
-        try{
-            String link = (String) params[0];
-            URL url = new URL(link);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-            conn.connect();
-
-            in = conn.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-
-            String data = null;
-            String webPage = "";
-            while( (data = reader.readLine()) != null){
-                webPage += data + "\n";
-            }
-            return webPage;
-
-
-
-        } catch (Exception e){
-            return new String("Exception: " + e.getMessage());
+        ParkLocation temp = null;
+        try {
+            temp = loadXmlFromNetwork(urls[0]);
+        } catch (IOException e) {
+            Log.e("ERROR: ", context.getResources().getString(R.string.connection_error));
+        } catch (XmlPullParserException e) {
+            Log.e("ERROR: ", context.getResources().getString(R.string.xml_error));
         }
+        return temp;
     }
+
+
+    /**
+     * Downloads XML from api.sfpark.org and parses it.
+     * @param urlString the URL to use in the request from the network.
+     * @return the location object with data filled in by SFParkXmlParser object.
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
+    private ParkLocation loadXmlFromNetwork(String urlString)
+            throws XmlPullParserException, IOException {
+        InputStream stream = null;
+
+        try {
+            stream = downloadUrl(urlString);
+            parkLoc = SFParkXmlParser.parse(stream);
+            // Makes sure that the InputStream is closed after the app is
+            // finished using it.
+        } finally {
+            if (stream != null) {
+                stream.close();
+            }
+        }
+        return parkLoc;
+    }
+
+    /**
+     *  Given a string representation of a URL,
+     * sets up a connection and gets an input stream.
+     * @param urlString the string that represents the URL.
+     * @return return value of HttpURLConnection.getInputStream().
+     * @throws IOException
+     */
+    private InputStream downloadUrl(String urlString) throws IOException {
+        URL url = new URL(urlString);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setReadTimeout(10000 /* milliseconds */);
+        conn.setConnectTimeout(15000 /* milliseconds */);
+        conn.setRequestMethod("GET");
+        conn.setDoInput(true);
+        // Starts the query
+        conn.connect();
+        return conn.getInputStream();
+    }
+    //checks internet connection before proceeding with execution.
     protected void onPreExecute(){ checkInternetConnection();}
 
 }

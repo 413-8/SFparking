@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 /**
  * Created by saralove on 4/22/2015.
+ * splash page for the application.
+ * shows splash for brief period while background tasks are started, then starts app
  */
 public class SplashPage extends Activity {
     @Override
@@ -17,8 +19,8 @@ public class SplashPage extends Activity {
             public void run() {
 
                 try {
-                    // Thread will sleep for 5 seconds
-                    sleep(5000);
+                    // Thread will sleep for 1 seconds
+                    sleep(1000);
 
                 } catch (Exception e) {
                     e.printStackTrace();
