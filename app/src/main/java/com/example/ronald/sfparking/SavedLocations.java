@@ -1,13 +1,16 @@
 package com.example.ronald.sfparking;
 
 import android.graphics.Color;
+import android.graphics.Point;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.HorizontalScrollView;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -51,26 +54,21 @@ public class SavedLocations extends ActionBarActivity {
     }*/
 
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String[] row = { "Location 1", "Location 2", "Location 3", "Location 4", "Location 5" };
-        String[] column = { "Longitude", "Latitude","Street Name"};
-        int rl=row.length+1;
-        int cl=column.length;
+        String[] row = {"Location 1", "Location 2", "Location 3", "Location 4", "Location 5"};
+        String[] column = {"Longitude", "Latitude", "Street Name"};
+        int rl = row.length;
+        int cl = column.length;
         //dataSource = new Park_LocationDataSource(this);
         //dataSource.write();
         //dataSource.read();
-        //Log.d("--", "R-Lenght--"+rl+"   "+"C-Lenght--"+cl);
 
         ScrollView sv = new ScrollView(this);
-        TableLayout tableLayout = createTableLayout(row, column,rl, cl);
-        HorizontalScrollView hsv = new HorizontalScrollView(this);
-
-        hsv.addView(tableLayout);
-        sv.addView(hsv);
+        TableLayout tableLayout = createTableLayout(row, column, rl, cl);
+        sv.addView(tableLayout);
         setContentView(sv);
 
     }
@@ -80,27 +78,35 @@ public class SavedLocations extends ActionBarActivity {
         TableRow tableRow = (TableRow) tableLayout.getChildAt(rowIndex);
 
         // get cell from row with columnIndex
-        TextView textView = (TextView)tableRow.getChildAt(columnIndex);
+        TextView textView = (TextView) tableRow.getChildAt(columnIndex);
 
         // make it black
         textView.setBackgroundColor(Color.BLACK);
     }
-    public void setHeaderTitle(TableLayout tableLayout, int rowIndex, int columnIndex){
+
+    public void setHeaderTitle(TableLayout tableLayout, int rowIndex, int columnIndex) {
 
         // get row from table with rowIndex
         TableRow tableRow = (TableRow) tableLayout.getChildAt(rowIndex);
 
         // get cell from row with columnIndex
-        TextView textView = (TextView)tableRow.getChildAt(columnIndex);
+        TextView textView = (TextView) tableRow.getChildAt(columnIndex);
 
         textView.setText("Hello");
     }
 
-    private TableLayout createTableLayout(String [] rv, String [] cv,int rowCount, int columnCount) {
+    private TableLayout createTableLayout(String[] rv, String[] cv, int rowCount, int columnCount) {
+        // 0) Get Display width
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int displayWidth = size.x;
+
         // 1) Create a tableLayout and its params
         TableLayout.LayoutParams tableLayoutParams = new TableLayout.LayoutParams();
         TableLayout tableLayout = new TableLayout(this);
-        tableLayout.setBackgroundColor(Color.BLUE); //unknown
+        tableLayout.setBackgroundColor(Color.LTGRAY); //visible when a TextView doesn't have a set background color
+        tableLayout.setMinimumWidth(displayWidth);
 
 
         // 2) create tableRow params
@@ -112,10 +118,54 @@ public class SavedLocations extends ActionBarActivity {
         //locationInfo = dataSource.getLocationInfo(0);
         //ArrayList <LocationInfo> Locations = new ArrayList<LocationInfo>();
         //for(int i = 0; i < 4; i++ ){
-       //     Locations.add(i,dataSource.getLocationInfo(i));
+        //     Locations.add(i,dataSource.getLocationInfo(i));
         //}
 
-        for (int i = 0; i < 1; i++) {
+        //tableRowParams.setMargins(1, 1, 1, 1); //space between cells (aka border thickness)
+        tableRowParams.weight = 1; //unknown
+
+        //////////single column table
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < columnCount; j++) {
+
+                // 3) create tableRow
+                TableRow tableRow = new TableRow(this);
+                tableRow.setBackgroundColor(Color.BLACK);
+                // 4) create textView
+                TextView textView = new TextView(this);
+                //  textView.setText(String.valueOf(j));
+                textView.setPadding(5, 5, 5, 5);
+                textView.setBackgroundColor(Color.WHITE);
+                textView.setGravity(Gravity.CENTER);
+
+                String s1 = rv[i];
+                String s2 = cv[j];
+                String s3 = s1 + s2;
+
+                textView.setText(s3);
+                if (j == 0) {
+                    tableRowParams.setMargins(0, 5, 0, 0);
+                } else {
+                    tableRowParams.setMargins(0, 0, 0, 0);
+                }
+                // 5) add textView to tableRow
+                tableRow.addView(textView, tableRowParams);
+                // 6) add tableRow to tableLayout
+                tableLayout.addView(tableRow, tableLayoutParams);
+
+            }
+            TextView textView = new TextView(this);
+            textView.setText(null);
+            textView.setPadding(0, 0, 0, 0);
+            TableRow tableRow = new TableRow(this);
+            tableRow.addView(textView, tableRowParams);
+            tableLayout.addView(tableRow, tableLayoutParams);
+
+
+        }
+
+        //////////matrix table sample
+        /*for (int i = 0; i < rowCount; i++) {
             // 3) create tableRow
             TableRow tableRow = new TableRow(this);
             tableRow.setBackgroundColor(Color.BLACK);
@@ -160,7 +210,7 @@ public class SavedLocations extends ActionBarActivity {
 
             // 6) add tableRow to tableLayout
             tableLayout.addView(tableRow, tableLayoutParams);
-        }
+        }*/
 
         return tableLayout;
     }
