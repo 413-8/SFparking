@@ -13,12 +13,14 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 /**
  * Created by Toren on 4/25/2015
  * Purpose: The activity will display the saved parking location(s) saved in the SQLite database to the user
  */
 public class SavedLocations extends ActionBarActivity {
-
+    private Park_LocationDataSource dataSource;
 /*    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,24 +56,13 @@ public class SavedLocations extends ActionBarActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String[] row = { "ROW1", "ROW2", "Row3", "Row4", "Row 5", "Row 6",
-                "Row 7", "ROW2", "Row3", "Row4", "Row 5", "Row 6",
-                "Row 7", "ROW2", "Row3", "Row4", "Row 5", "Row 6",
-                "Row 7", "ROW2", "Row3", "Row4", "Row 5", "Row 6",
-                "Row 7", "ROW2", "Row3", "Row4", "Row 5", "Row 6",
-                "Row 7", "ROW2", "Row3", "Row4", "Row 5", "Row 6",
-                "Row 7", "ROW2", "Row3", "Row4", "Row 5", "Row 6",
-                "Row 7", "ROW2", "Row3", "Row4", "Row 5", "Row 6",
-                "Row 7", "ROW2", "Row3", "Row4", "Row 5", "Row 6",
-                "Row 7", "ROW2", "Row3", "Row4", "Row 5", "Row 6",
-                "Row 7", "ROW2", "Row3", "Row4", "Row 5", "Row 6",
-                "Row 7", "ROW2", "Row3", "Row4", "Row 5", "Row 6",
-                "Row 7" };
-        String[] column = { "COLUMN1", "COLUMN2", "COLUMN3", "COLUMN4",
-                "COLUMN5", "COLUMN6" };
-        int rl=row.length;
+        String[] row = { "Location 1", "Location 2", "Location 3", "Location 4", "Location 5" };
+        String[] column = { "Longitude", "Latitude","Street Name"};
+        int rl=row.length+1;
         int cl=column.length;
-
+        //dataSource = new Park_LocationDataSource(this);
+        //dataSource.write();
+        //dataSource.read();
         //Log.d("--", "R-Lenght--"+rl+"   "+"C-Lenght--"+cl);
 
         ScrollView sv = new ScrollView(this);
@@ -111,17 +102,27 @@ public class SavedLocations extends ActionBarActivity {
         TableLayout tableLayout = new TableLayout(this);
         tableLayout.setBackgroundColor(Color.BLUE); //unknown
 
+
         // 2) create tableRow params
         TableRow.LayoutParams tableRowParams = new TableRow.LayoutParams();
-        tableRowParams.setMargins(1, 1, 1, 1); //space between cells (aka border thickness)
+        tableRowParams.setMargins(2, 2, 2, 2); //space between cells (aka border thickness)
         tableRowParams.weight = 1; //unknown
 
-        for (int i = 0; i < rowCount; i++) {
+        LocationInfo locationInfo = new LocationInfo();
+        //locationInfo = dataSource.getLocationInfo(0);
+        //ArrayList <LocationInfo> Locations = new ArrayList<LocationInfo>();
+        //for(int i = 0; i < 4; i++ ){
+       //     Locations.add(i,dataSource.getLocationInfo(i));
+        //}
+
+        for (int i = 0; i < 1; i++) {
             // 3) create tableRow
             TableRow tableRow = new TableRow(this);
             tableRow.setBackgroundColor(Color.BLACK);
-
+            //locationInfo = dataSource.getLocationInfo(i);
+            //String [] LocationInfoString = {Double.toString(locationInfo.getLongitude()), Double.toString(locationInfo.getLatitude()), locationInfo.getStreetname()};
             for (int j= 0; j < columnCount; j++) {
+
                 // 4) create textView
                 TextView textView = new TextView(this);
                 //  textView.setText(String.valueOf(j));
@@ -133,23 +134,25 @@ public class SavedLocations extends ActionBarActivity {
                 String s2 = Integer.toString(j);
                 String s3 = s1 + s2;
                 int id = Integer.parseInt(s3);
-                //Log.d("TAG", "-___>" + id);
-                if (i ==0 && j==0){
-                    textView.setText("");
-                } else if(i==0){
-                    //Log.d("TAAG", "set Column Headers");
-                    textView.setText(cv[j-1]);
-                }else if( j==0){
-                    //Log.d("TAAG", "Set Row Headers");
-                    textView.setText(rv[i-1]);
-                }else {
-                    textView.setText(""+id);
-                    // check id=23
-                    if(id==23){
-                        textView.setText("ID=23");
 
-                    }
-                }
+                //textView.setText(LocationInfoString[j]);
+                //Log.d("TAG", "-___>" + id);
+               // if (i ==0 && j==0){
+                  //  textView.setText("");
+                //} else if(i==0){
+                    //Log.d("TAAG", "set Column Headers");
+                  //  textView.setText(cv[j-1]);
+                //}else if( j==0){
+                    //Log.d("TAAG", "Set Row Headers");
+                  //  textView.setText(rv[i-1]);
+                //}else {
+                  //  textView.setText(""+id);
+                    // check id=23
+                    //if(id==23){
+                      //  textView.setText("ID=23");
+
+                    //}
+                //}
 
                 // 5) add textView to tableRow
                 tableRow.addView(textView, tableRowParams);

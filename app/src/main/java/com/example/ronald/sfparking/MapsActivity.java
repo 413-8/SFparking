@@ -50,6 +50,7 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
     private SlidingUpPanelLayout slideUp_Layout;
     private LinearLayout noPin_layout;
     private TextView dataTexview;
+    private Park_LocationDataSource dataSource;
 
     String longitude;
     String latitude;
@@ -64,6 +65,9 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         setContentView(R.layout.activity_maps);
         setUpMapIfNeeded();
 
+        dataSource = new Park_LocationDataSource(this);
+        dataSource.write();
+        dataSource.read();
         slideUp_Layout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
         noPin_layout = (LinearLayout) findViewById(R.id.layout_no_pin);
         dataTexview = (TextView) findViewById(R.id.data_textview);
@@ -224,12 +228,21 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         setUpPanelNoPin();
     }
 
-    /* Park Here Button */
+    /* I Parked Here Button */
     public void parkButton(View view){
         Location c = getMyLocation();
 
         if(c != null) {
             LatLng l = new LatLng(c.getLatitude(), c.getLongitude());
+            LocationInfo locationInfo = new LocationInfo();
+            locationInfo.setLatitude(c.getLatitude());
+            locationInfo.setLongitude(c.getLongitude());
+            locationInfo.setOn_off_street("On");
+            locationInfo.setStreet_name("Garfield");
+            locationInfo.setTime("8:00");
+            dataSource.createLocationInfo(locationInfo);
+
+
             mMap.addMarker(new MarkerOptions()
                             .position(l)
                             .title("I park here!!!")

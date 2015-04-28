@@ -36,9 +36,9 @@ public class Park_LocationDataSource {
             cursor.moveToNext();
 
         }
-        public LocationInfo getLocationInfo(long id){
+        public LocationInfo getLocationInfo(int id){
             Cursor cursor = database.query(MySQLiteHelper.TABLE_PARKINFO, allColumns, MySQLiteHelper.KEY_ID + " = " + new String []{String.valueOf(id)}, null, null, null, null );
-            cursor.moveToPosition((int)id);
+            cursor.moveToPosition(id);
             LocationInfo locationInfo = new LocationInfo(cursor.getInt(0), cursor.getDouble(1), cursor.getDouble(2), cursor.getString(3), cursor.getString(4),cursor.getString(5));
             return locationInfo;
         }
