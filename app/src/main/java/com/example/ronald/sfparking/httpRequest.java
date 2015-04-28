@@ -37,7 +37,7 @@ public class httpRequest extends AsyncTask<String, Void, ParkLocation>{
 
 
     /*
-     * the method accepts the URL to be used as its first paramter.
+     * the method accepts the URL to be used as its first parameter.
      * doInBackground opens an internet connection, 
      * reads the text on the resulting page on the url to a buffer.
      * after reading a line, it appends it to the String webPage, 
@@ -87,7 +87,7 @@ public class httpRequest extends AsyncTask<String, Void, ParkLocation>{
      *  Given a string representation of a URL,
      * sets up a connection and gets an input stream.
      * @param urlString the string that represents the URL.
-     * @return return value of HttpURLConnection.getInputStream().
+     * @return return value of HttpURLConnection.getInputStream(): an input stream from the url.
      * @throws IOException
      */
     private InputStream downloadUrl(String urlString) throws IOException {

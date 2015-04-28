@@ -9,6 +9,7 @@ import android.net.Uri;
 public class URLMaker {
 
     private static URLMaker instance = new URLMaker();
+    //constructor
     private URLMaker() {}
 
     /**

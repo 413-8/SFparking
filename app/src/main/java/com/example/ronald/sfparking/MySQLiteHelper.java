@@ -11,11 +11,22 @@ import android.util.Log;
  */
 public class MySQLiteHelper extends SQLiteOpenHelper {
 
-    public static final int DATABASE_VERSON = 1;
+    public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "Parking_Information.db";
 
-    public MySQLiteHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSON);
+    private static MySQLiteHelper instanceDB;
+    //constructor
+
+    public static synchronized MySQLiteHelper getInstance(Context context)
+    {
+        if(instanceDB==null)
+            instanceDB=new MySQLiteHelper(context);
+
+        return instanceDB;
+    }
+
+    private MySQLiteHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override

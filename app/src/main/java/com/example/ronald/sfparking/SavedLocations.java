@@ -22,7 +22,7 @@ import java.util.ArrayList;
  * Created by Toren on 4/25/2015
  * Purpose: The activity will display the saved parking location(s) saved in the SQLite database to the user
  */
-public class SavedLocations extends ActionBarActivity {
+public class    SavedLocations extends ActionBarActivity {
     private Park_LocationDataSource dataSource;
 /*    @Override
     protected void onCreate(Bundle savedInstanceState) {

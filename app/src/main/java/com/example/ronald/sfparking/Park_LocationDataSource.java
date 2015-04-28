@@ -23,7 +23,7 @@ public class Park_LocationDataSource {
                 SqliteSchema.SqlEntry.COLUMN_TIME
         };
 
-        public Park_LocationDataSource(Context context){dbHelper = new MySQLiteHelper(context);}
+        public Park_LocationDataSource(Context context){dbHelper = MySQLiteHelper.getInstance(context);}
 
         public void read() {database = dbHelper.getReadableDatabase();}
 
