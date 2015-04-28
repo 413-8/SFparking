@@ -28,8 +28,8 @@ public final class SqliteSchema {
             SqlEntry.COLUMN_LONGITUDE + " TEXT, " +
             SqlEntry.COLUMN_LATITUDE + " TEXT, " +
             SqlEntry.COLUMN_STREET + " TEXT, " +
-            SqlEntry.COLUMN_ON_OFF + " TEXT" +
-            SqlEntry.COLUMN_TIME + " NUMERIC, " +
+            SqlEntry.COLUMN_ON_OFF + " TEXT," +
+            SqlEntry.COLUMN_TIME + " NUMERIC " +
             " )";
 
     protected static final String DELETE_TABLE = "DROP TABLE IF EXISTS " + SqlEntry.TABLE_NAME;
