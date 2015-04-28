@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.location.LocationManager;
 import android.location.Criteria;
 import android.content.Context;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.TextView;
 
@@ -25,9 +27,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
-import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -38,11 +41,15 @@ import java.io.InputStream;
 /**
  * The main method of the application.
  */
-public class MapsActivity extends FragmentActivity implements OnMapLongClickListener{
+public class MapsActivity extends FragmentActivity implements OnMapLongClickListener, OnMapClickListener{
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private Marker mymarker;
     private String url;
+
+    private SlidingUpPanelLayout slideUp_Layout;
+    private LinearLayout noPin_layout;
+    private TextView dataTexview;
 
     String longitude;
     String latitude;
@@ -53,8 +60,14 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_maps);
         setUpMapIfNeeded();
+
+        slideUp_Layout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+        noPin_layout = (LinearLayout) findViewById(R.id.layout_no_pin);
+        dataTexview = (TextView) findViewById(R.id.data_textview);
+        setUpPanelNoPin();
     }
 
     @Override
@@ -104,71 +117,32 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
         mMap.setMyLocationEnabled(true);
         final UiSettings uiSettings = mMap.getUiSettings();
-
         uiSettings.setCompassEnabled(true);
-        uiSettings.setZoomControlsEnabled(true);
-        centerMapOnMyLocation();
+
+        /* Center Map on Current Location */
+        centerMapOnLocation(getMyLocation());
 
         mMap.setOnMapLongClickListener(this);
+        mMap.setOnMapClickListener(this);
+    }
 
 
-        //"I Parked Here!" button to save data of parking location
-        //currently marks current location as the parked location
-        //@TODO make the button use the dropped pin as the parked location
-        Button b1 = (Button) findViewById(R.id.park);
-        //"Clear Map" button to remove dropped pin from map view
-        Button b2 = (Button) findViewById(R.id.clear);
-        //"History" button to switch to history activity
-        Button b3 = (Button) findViewById(R.id.history);
+    /* Set up panel to Park here and History buttons. */
+    public void setUpPanelNoPin(){
+        if(noPin_layout.getVisibility() == LinearLayout.GONE)
+            noPin_layout.setVisibility(LinearLayout.VISIBLE);
 
+        slideUp_Layout.setPanelHeight(150);
+        slideUp_Layout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        slideUp_Layout.setTouchEnabled(false);
+    }
 
-
-        /** "I PARKED HERE" button behavior
-         * gets the location of the device and places a marker at that location once the button
-         * is pressed.
-         * If unable to get location, prints toast message to notify user.
-         * TODO: once Lat Lng is set, store it as a location in the historyDB.
-         */
-        b1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Location c = getMyLocation();
-
-                if(c != null) {
-                    LatLng l = new LatLng(c.getLatitude(), c.getLongitude());
-                    mMap.addMarker(new MarkerOptions()
-                         .position(l)
-                         .title("I park here!!!")
-                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-                    );
-                } else{
-                    Context context = getApplicationContext();
-                    CharSequence text = "Current Location Not Available!!!";
-                    int duration = Toast.LENGTH_SHORT;
-
-                    Toast toast = Toast.makeText(context, text, duration);
-                    toast.show();
-                }
-
-            }
-        });
-
-        b2.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View z){
-                mMap.clear();
-            }
-        });
-
-        //b3.setOnClickListener(this);
-        b3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(".SavedLocations"));
-            }
-        });
-
+    /* Set up panel to show information where pin is dropped + Save Pin and Remove Pin buttons */
+    public void setUpPanelPin(int size){
+        noPin_layout.setVisibility(LinearLayout.GONE);
+        slideUp_Layout.setPanelHeight(size);
+        slideUp_Layout.setTouchEnabled(true);
+        slideUp_Layout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
     }
 
 
@@ -181,6 +155,14 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
      */
     @Override
     public void onMapLongClick(LatLng latLng) {
+
+        /*center map on dropped marker */
+        Location m = new Location("Marker");
+        m.setLatitude(latLng.latitude);
+        m.setLongitude(latLng.longitude);
+        centerMapOnLocation(m);
+
+
         /* removes previous marker if exists */
         if(mymarker != null)
             mymarker.remove();
@@ -192,44 +174,99 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
         String StreetName = "";
         String OnOffSt = "";
+        String rates = "";
 
         /* request and parse sfpark api */
         try{
             ParkLocation parkLoc = new httpRequest(getApplicationContext()).execute(url).get();
             StreetName = parkLoc.stName;
             OnOffSt = parkLoc.onOffStreet;
+            rates = parkLoc.rates;
         } catch (Exception e){e.printStackTrace();}
+
 
         /* add marker to the map: green if info available, red otherwise */
         if (StreetName.equals("No Data")) {
             mymarker = mMap.addMarker(new MarkerOptions()
-                    .position(latLng)
-                    .title(StreetName)
-                    .snippet("Street: " + OnOffSt));
+                    .position(latLng));
+
+            dataTexview.setText("\tNo Data");
+
+
+        /*Set up panel when pin is dropped with No data*/
+            setUpPanelPin(160);
         }
         else {
             mymarker = mMap.addMarker(new MarkerOptions()
                     .position(latLng)
-                    .title(StreetName)
-                    .snippet("Street: " + OnOffSt)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+
+            dataTexview.setText("\tStreet Name: " + StreetName + "\n\tType: " + OnOffSt + " street." + "\n\tRate:" + rates);
+
+
+        /*Set up panel when pin is dropped with data */
+            setUpPanelPin(300);
         }
+
+
     }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        if(slideUp_Layout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)
+            slideUp_Layout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+    }
+
+    /* onClick function for each button */
+    /* Remove Pin Button */
+    public void removePinButton(View view){
+        mymarker.remove();
+        setUpPanelNoPin();
+    }
+
+    /* Park Here Button */
+    public void parkButton(View view){
+        Location c = getMyLocation();
+
+        if(c != null) {
+            LatLng l = new LatLng(c.getLatitude(), c.getLongitude());
+            mMap.addMarker(new MarkerOptions()
+                            .position(l)
+                            .title("I park here!!!")
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+            );
+        } else{
+            Context context = getApplicationContext();
+            CharSequence text = "Current Location Not Available!!!";
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
+
+    }
+
+    /* History Button */
+    public void historyButton(View view){
+
+        startActivity(new Intent(".SavedLocations"));
+    }
+
+    /* TODO: Save Pin Button */
+
 
     /**
      * recenters the google map view on the user's location.
      */
-    public void centerMapOnMyLocation(){
+    public void centerMapOnLocation(Location location){
 
-        Location currentLocation = getMyLocation();
-
-       if (currentLocation != null)
+     if (location != null)
         {
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), 13));
+                    new LatLng(location.getLatitude(), location.getLongitude()), 13));
 
             CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()))      // Sets the center of the map to location user
+                    .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Sets the center of the map to location user
                     .zoom(15)                   // Sets the zoom
                     .bearing(0)                // Sets the orientation of the camera to east
                     .tilt(0)                   // Sets the tilt of the camera to 30 degrees
@@ -267,7 +304,6 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         URLMaker temp = URLMaker.getInstance();
         url = temp.makeURL(latitude, longitude, radius);
     }
-
 
 
 
