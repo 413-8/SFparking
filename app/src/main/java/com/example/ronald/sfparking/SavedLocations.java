@@ -15,9 +15,7 @@ import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Stack;
 
 /**
  * Created by Toren on 4/25/2015
@@ -115,12 +113,20 @@ public class SavedLocations extends ActionBarActivity {
         tableRowParams.setMargins(1, 1, 1, 1); //space between cells (aka border thickness)
         tableRowParams.weight = 1; //unknown
 
-        List<LocationInfo> locations = new ArrayList<LocationInfo>();
+        Stack<LocationInfo> locations = new Stack<LocationInfo>();
         locations = dataSource.getAllLocations();
+        LocationInfo currentLocation;
 
 
         //////////single column table
         for (int i = 0; i < 5; i++) {
+
+            if (locations.isEmpty()) {
+                break;
+            } else {
+                currentLocation = locations.pop();
+            }
+
             for (int j = 0; j <= 3; j++) {
 
                 TableRow tableRow = new TableRow(this);
@@ -134,19 +140,19 @@ public class SavedLocations extends ActionBarActivity {
                 switch (j) {
                     case 0:
                         tableRowParams.setMargins(0, 5, 0, 0);
-                        textView.setText((String.valueOf(locations.get(i).getId())));
+                        textView.setText((String.valueOf(currentLocation.getId())));
                         System.out.println("case 0");
                         break;
                     case 1:
-                        textView.setText(locations.get(i).getStreetname());
+                        textView.setText(currentLocation.getStreetname());
                         System.out.println("case 1");
                         break;
                     case 2:
-                        textView.setText(locations.get(i).getOn_off_street());
+                        textView.setText(currentLocation.getOn_off_street());
                         System.out.println("case 2");
                         break;
                     case 3:
-                        textView.setText(locations.get(i).getTime());
+                        textView.setText(currentLocation.getTime());
                         System.out.println("case 3");
                         break;
                 }
@@ -161,7 +167,6 @@ public class SavedLocations extends ActionBarActivity {
             TableRow tableRow = new TableRow(this);
             tableRow.addView(textView, tableRowParams);
             tableLayout.addView(tableRow, tableLayoutParams);
-
 
         }
 
