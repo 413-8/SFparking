@@ -45,6 +45,8 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private Marker mymarker;
+    private Location m = new Location("Marker");
+    private ParkLocation parkLoc;
     private String url;
 
     private SlidingUpPanelLayout slideUp_Layout;
@@ -161,7 +163,6 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
     public void onMapLongClick(LatLng latLng) {
 
         /*center map on dropped marker */
-        Location m = new Location("Marker");
         m.setLatitude(latLng.latitude);
         m.setLongitude(latLng.longitude);
         centerMapOnLocation(m);
@@ -182,8 +183,8 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
         /* request and parse sfpark api */
         try{
-            ParkLocation parkLoc = new httpRequest(getApplicationContext()).execute(url).get();
-            StreetName = parkLoc.stName;
+            parkLoc = new httpRequest(getApplicationContext()).execute(url).get();
+            StreetName = parkLoc.streetName;
             OnOffSt = parkLoc.onOffStreet;
             rates = parkLoc.rates;
         } catch (Exception e){e.printStackTrace();}
@@ -222,6 +223,38 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
     }
 
     /* onClick function for each button */
+
+    /* Save Pin Button */
+    public void savePinButton (View view){
+        Location c = m;    // m is a data field in the MapsActivity class
+
+        if(c != null) {
+            LatLng l = new LatLng(c.getLatitude(), c.getLongitude());
+            LocationInfo locationInfo = new LocationInfo();
+            locationInfo.setLatitude(c.getLatitude());
+            locationInfo.setLongitude(c.getLongitude());
+            locationInfo.setOn_off_street(parkLoc.getOnOffStreet());
+            locationInfo.setStreet_name(parkLoc.getStreetName());
+            locationInfo.setTime("12:00");
+            dataSource.createLocationInfo(locationInfo);
+
+
+            mMap.addMarker(new MarkerOptions()
+                            .position(l)
+                            .title("I park here!!!")
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+            );
+        } else{
+            Context context = getApplicationContext();
+            CharSequence text = "Current Location Not Available!!!";
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
+
+    }
+
     /* Remove Pin Button */
     public void removePinButton(View view){
         mymarker.remove();
@@ -264,9 +297,6 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
         startActivity(new Intent(".SavedLocations"));
     }
-
-    /* TODO: Save Pin Button */
-
 
     /**
      * recenters the google map view on the user's location.
@@ -312,6 +342,25 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
 
         return myLocation;
     }
+
+//    private Location getPinLocation(Location pin) {
+//        String longitude = Double.toString(pin.getLongitude());
+//        String latitude = Double.toString(pin.getLatitude());
+//
+//        makeURLString(latitude, longitude, radius);
+//
+//        String StreetName = "";
+//        String OnOffSt = "";
+//        String rates = "";
+//
+//        /* request and parse sfpark api */
+//        try{
+//            ParkLocation parkLoc = new httpRequest(getApplicationContext()).execute(url).get();
+//            StreetName = parkLoc.stName;
+//            OnOffSt = parkLoc.onOffStreet;
+//            rates = parkLoc.rates;
+//        } catch (Exception e){e.printStackTrace();}
+//    }
 
     private void makeURLString(String latitude, String longitude, String radius) {
         URLMaker temp = URLMaker.getInstance();

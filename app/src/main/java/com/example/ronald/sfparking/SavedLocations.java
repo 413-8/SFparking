@@ -118,7 +118,7 @@ public class SavedLocations extends ActionBarActivity {
         LocationInfo currentLocation;
 
 
-        //////////single column table
+        //single column table
         for (int i = 0; i < 5; i++) {
 
             if (locations.isEmpty()) {
@@ -127,7 +127,7 @@ public class SavedLocations extends ActionBarActivity {
                 currentLocation = locations.pop();
             }
 
-            for (int j = 0; j <= 3; j++) {
+            for (int j = 0; j <= 6; j++) {
 
                 TableRow tableRow = new TableRow(this);
                 tableRow.setBackgroundColor(Color.BLACK);
@@ -140,7 +140,7 @@ public class SavedLocations extends ActionBarActivity {
                 switch (j) {
                     case 0:
                         tableRowParams.setMargins(0, 5, 0, 0);
-                        textView.setText((String.valueOf(currentLocation.getId())));
+                        textView.setText("ID: " + currentLocation.getId());
                         System.out.println("case 0");
                         break;
                     case 1:
@@ -148,12 +148,20 @@ public class SavedLocations extends ActionBarActivity {
                         System.out.println("case 1");
                         break;
                     case 2:
-                        textView.setText(currentLocation.getOn_off_street());
+                        textView.setText("" + currentLocation.getOn_off_street() + "-street Parking");
                         System.out.println("case 2");
                         break;
                     case 3:
                         textView.setText(currentLocation.getTime());
                         System.out.println("case 3");
+                        break;
+                    case 4:
+                        textView.setText("Lat: " + currentLocation.getLatitude());
+                        System.out.println("case 4");
+                        break;
+                    case 5:
+                        textView.setText("Long: " + currentLocation.getLongitude());
+                        System.out.println("case 5");
                         break;
                 }
 
@@ -170,9 +178,9 @@ public class SavedLocations extends ActionBarActivity {
 
         }
 
-
         return tableLayout;
     }
+
 }
 
 
