@@ -23,7 +23,7 @@ import java.util.List;
  * Created by Toren on 4/25/2015
  * Purpose: The activity will display the saved parking location(s) saved in the SQLite database to the user
  */
-public class    SavedLocations extends ActionBarActivity {
+public class SavedLocations extends ActionBarActivity {
     private Park_LocationDataSource dataSource;
 /*    @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,12 +32,12 @@ public class    SavedLocations extends ActionBarActivity {
     }
 
 
-*//*    @Override
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_saved_locations, menu);
         return true;
-    }*//*
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -115,7 +115,7 @@ public class    SavedLocations extends ActionBarActivity {
 
         // 2) create tableRow params
         TableRow.LayoutParams tableRowParams = new TableRow.LayoutParams();
-        tableRowParams.setMargins(2, 2, 2, 2); //space between cells (aka border thickness)
+        tableRowParams.setMargins(1, 1, 1, 1); //space between cells (aka border thickness)
         tableRowParams.weight = 1; //unknown
 
         List<LocationInfo> locations = new ArrayList<LocationInfo>();
@@ -131,34 +131,40 @@ public class    SavedLocations extends ActionBarActivity {
         tableRowParams.weight = 1; //unknown
 
         //////////single column table
-        for (int i = 0; i < rowCount; i++) {
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j <= 3; j++) {
 
-            for (int j = 0; j < columnCount; j++) {
-
-                // 3) create tableRow
                 TableRow tableRow = new TableRow(this);
                 tableRow.setBackgroundColor(Color.BLACK);
-                // 4) create textView
                 TextView textView = new TextView(this);
-                //  textView.setText(String.valueOf(j));
                 textView.setPadding(5, 5, 5, 5);
                 textView.setBackgroundColor(Color.WHITE);
                 textView.setGravity(Gravity.CENTER);
-
-                String s1 = rv[i];
-                String s2 = cv[j];
-                String s3 = s1 + s2;
-
-                textView.setText(s3);
-                if (j == 0) {
-                    tableRowParams.setMargins(0, 5, 0, 0);
-                } else {
-                    tableRowParams.setMargins(0, 0, 0, 0);
+                tableRowParams.setMargins(0, 0, 0, 0); //for columns 1-j
+                System.out.println("pre switch");
+                switch (j) {
+                    case 0:
+                        tableRowParams.setMargins(0, 5, 0, 0);
+                        textView.setText((String.valueOf(locations.get(i).getId())));
+                        System.out.println("case 0");
+                        break;
+                    case 1:
+                        textView.setText(locations.get(i).getStreetname());
+                        System.out.println("case 1");
+                        break;
+                    case 2:
+                        textView.setText(locations.get(i).getOn_off_street());
+                        System.out.println("case 2");
+                        break;
+                    case 3:
+                        textView.setText(locations.get(i).getTime());
+                        System.out.println("case 3");
+                        break;
                 }
-                // 5) add textView to tableRow
+                System.out.println("post switch");
                 tableRow.addView(textView, tableRowParams);
-                // 6) add tableRow to tableLayout
                 tableLayout.addView(tableRow, tableLayoutParams);
+                System.out.println("end inner for");
 
             }
             TextView textView = new TextView(this);
@@ -171,53 +177,6 @@ public class    SavedLocations extends ActionBarActivity {
 
         }
 
-        //////////matrix table sample
-        /*for (int i = 0; i < rowCount; i++) {
-            // 3) create tableRow
-            TableRow tableRow = new TableRow(this);
-            tableRow.setBackgroundColor(Color.BLACK);
-            //locationInfo = dataSource.getLocationInfo(i);
-            //String [] LocationInfoString = {Double.toString(locationInfo.getLongitude()), Double.toString(locationInfo.getLatitude()), locationInfo.getStreetname()};
-            for (int j= 0; j < columnCount; j++) {
-
-                // 4) create textView
-                TextView textView = new TextView(this);
-                //  textView.setText(String.valueOf(j));
-                textView.setPadding(5, 5, 5, 5);
-                textView.setBackgroundColor(Color.WHITE);
-                textView.setGravity(Gravity.CENTER);
-
-                String s1 = Integer.toString(i);
-                String s2 = Integer.toString(j);
-                String s3 = s1 + s2;
-                int id = Integer.parseInt(s3);
-
-                //textView.setText(LocationInfoString[j]);
-                //Log.d("TAG", "-___>" + id);
-               // if (i ==0 && j==0){
-                  //  textView.setText("");
-                //} else if(i==0){
-                    //Log.d("TAAG", "set Column Headers");
-                  //  textView.setText(cv[j-1]);
-                //}else if( j==0){
-                    //Log.d("TAAG", "Set Row Headers");
-                  //  textView.setText(rv[i-1]);
-                //}else {
-                  //  textView.setText(""+id);
-                    // check id=23
-                    //if(id==23){
-                      //  textView.setText("ID=23");
-
-                    //}
-                //}
-
-                // 5) add textView to tableRow
-                tableRow.addView(textView, tableRowParams);
-            }
-
-            // 6) add tableRow to tableLayout
-            tableLayout.addView(tableRow, tableLayoutParams);
-        }*/
 
         return tableLayout;
     }
