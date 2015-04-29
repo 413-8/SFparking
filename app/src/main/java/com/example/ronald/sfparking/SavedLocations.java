@@ -66,6 +66,9 @@ public class    SavedLocations extends ActionBarActivity {
         //dataSource.write();
         //dataSource.read();
 
+        dataSource = new Park_LocationDataSource(this);
+        dataSource.open();
+
         ScrollView sv = new ScrollView(this);
         TableLayout tableLayout = createTableLayout(row, column, rl, cl);
         sv.addView(tableLayout);
@@ -126,6 +129,8 @@ public class    SavedLocations extends ActionBarActivity {
 
         //////////single column table
         for (int i = 0; i < rowCount; i++) {
+            locationInfo = dataSource.getLocationInfo(i);
+
             for (int j = 0; j < columnCount; j++) {
 
                 // 3) create tableRow
