@@ -17,6 +17,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Toren on 4/25/2015
@@ -117,7 +118,9 @@ public class    SavedLocations extends ActionBarActivity {
         tableRowParams.setMargins(2, 2, 2, 2); //space between cells (aka border thickness)
         tableRowParams.weight = 1; //unknown
 
-        LocationInfo locationInfo = new LocationInfo();
+        List<LocationInfo> locations = new ArrayList<LocationInfo>();
+        locations = dataSource.getAllLocations();
+        //LocationInfo locationInfo = new LocationInfo();
         //locationInfo = dataSource.getLocationInfo(0);
         //ArrayList <LocationInfo> Locations = new ArrayList<LocationInfo>();
         //for(int i = 0; i < 4; i++ ){
@@ -129,7 +132,6 @@ public class    SavedLocations extends ActionBarActivity {
 
         //////////single column table
         for (int i = 0; i < rowCount; i++) {
-            locationInfo = dataSource.getLocationInfo(i);
 
             for (int j = 0; j < columnCount; j++) {
 
