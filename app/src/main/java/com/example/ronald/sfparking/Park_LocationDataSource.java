@@ -8,8 +8,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.view.View;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Stack;
 
 import static com.example.ronald.sfparking.SqliteSchema.*;
 
@@ -78,8 +77,8 @@ public class Park_LocationDataSource {
             database.close();
         }
 
-        public List<LocationInfo> getAllLocations() {
-            List<LocationInfo> locations = new ArrayList<LocationInfo>();
+        public Stack<LocationInfo> getAllLocations() {
+            Stack<LocationInfo> locations = new Stack<LocationInfo>();
 
             Cursor cursor = database.query(
                     SqlEntry.TABLE_NAME,
@@ -91,9 +90,12 @@ public class Park_LocationDataSource {
                     null
             );
             cursor.moveToFirst();
+            if (cursor.isNull(0)) {
+                return locations;
+            }
             while (!cursor.isAfterLast()) {
                 LocationInfo location = cursorToLocationInfo(cursor);
-                locations.add(location);
+                locations.push(location);
                 cursor.moveToNext();
             }
             cursor.close();
