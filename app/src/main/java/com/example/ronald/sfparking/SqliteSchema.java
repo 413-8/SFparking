@@ -11,7 +11,7 @@ import android.provider.BaseColumns;
  */
 public final class SqliteSchema {
 
-    public SqliteSchema () {};
+    public SqliteSchema () {}
 
     public static abstract class SqlEntry implements BaseColumns {
         public static final String TABLE_NAME = "parking_info";
