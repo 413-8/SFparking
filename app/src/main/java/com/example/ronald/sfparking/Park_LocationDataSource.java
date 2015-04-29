@@ -7,6 +7,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.example.ronald.sfparking.SqliteSchema.*;
+
 /**
  * Created by KingRat on 4/26/2015.
  */
@@ -14,14 +19,7 @@ public class Park_LocationDataSource {
 
         private SQLiteDatabase database;
         private MySQLiteHelper dbHelper;
-        private String [] allColumns = {
-                SqliteSchema.SqlEntry.COLUMN_ID,
-                SqliteSchema.SqlEntry.COLUMN_LONGITUDE,
-                SqliteSchema.SqlEntry.COLUMN_LATITUDE,
-                SqliteSchema.SqlEntry.COLUMN_STREET,
-                SqliteSchema.SqlEntry.COLUMN_ON_OFF,
-                SqliteSchema.SqlEntry.COLUMN_TIME
-        };
+        private String [] allColumns = getColumns();
 
         public Park_LocationDataSource(Context context){dbHelper = MySQLiteHelper.getInstance(context);}
 
@@ -34,28 +32,89 @@ public class Park_LocationDataSource {
         public void createLocationInfo(LocationInfo locationinfo){
 
             ContentValues values = new ContentValues();
-            values.put(SqliteSchema.SqlEntry.COLUMN_LONGITUDE, locationinfo.getLongitude());
-            values.put(SqliteSchema.SqlEntry.COLUMN_LATITUDE, locationinfo.getLatitude());
-            values.put(SqliteSchema.SqlEntry.COLUMN_STREET, locationinfo.getStreetname());
-            values.put(SqliteSchema.SqlEntry.COLUMN_ON_OFF, locationinfo.getOn_off_street());
-            values.put(SqliteSchema.SqlEntry.COLUMN_TIME, locationinfo.getTime());
+            values.put(SqlEntry.COLUMN_LONGITUDE, locationinfo.getLongitude());
+            values.put(SqlEntry.COLUMN_LATITUDE, locationinfo.getLatitude());
+            values.put(SqlEntry.COLUMN_STREET, locationinfo.getStreetname());
+            values.put(SqlEntry.COLUMN_ON_OFF, locationinfo.getOn_off_street());
+            values.put(SqlEntry.COLUMN_TIME, locationinfo.getTime());
 
-            database.insert(SqliteSchema.SqlEntry.TABLE_NAME,null,values);
-            long insertId = database.insert(SqliteSchema.SqlEntry.TABLE_NAME, null, values);
-            Cursor cursor = database.query(SqliteSchema.SqlEntry.TABLE_NAME, allColumns, SqliteSchema.SqlEntry.COLUMN_ID + " = " + insertId, null, null, null, null );
+            database.insert(SqlEntry.TABLE_NAME,null,values);
+            long insertId = database.insert(SqlEntry.TABLE_NAME, null, values);
+            Cursor cursor = database.query(
+                    SqlEntry.TABLE_NAME,
+                    allColumns,
+                    SqlEntry.COLUMN_ID + " = " + insertId,
+                    null,
+                    null,
+                    null,
+                    null
+            );
             cursor.moveToNext();
 
         }
         public LocationInfo getLocationInfo(int id){
-            Cursor cursor = database.query(SqliteSchema.SqlEntry.TABLE_NAME, allColumns, SqliteSchema.SqlEntry.COLUMN_ID + " = " + new String []{String.valueOf(id)}, null, null, null, null );
+            String [] lookupId = {String.valueOf(id)};
+            Cursor cursor = database.query(
+                    SqlEntry.TABLE_NAME,
+                    allColumns,
+                    SqlEntry.COLUMN_ID + " = " + lookupId,
+                    null,
+                    null,
+                    null,
+                    null
+            );
             cursor.moveToPosition(id);
-            LocationInfo locationInfo = new LocationInfo(cursor.getInt(0), cursor.getDouble(1), cursor.getDouble(2), cursor.getString(3), cursor.getString(4),cursor.getString(5));
-            return locationInfo;
+            LocationInfo location = new LocationInfo();
+            location = cursorToLocationInfo(cursor);
+            cursor.close();
+            return location;
         }
         public void deleteLocationInfo(LocationInfo locationinfo){
             long id = locationinfo.getId();
-            database.delete(SqliteSchema.SqlEntry.TABLE_NAME, SqliteSchema.SqlEntry.COLUMN_ID + " = " + id, null);
+            database.delete(SqlEntry.TABLE_NAME, SqlEntry.COLUMN_ID + " = " + id, null);
             database.close();
         }
+
+        public List<LocationInfo> getAllLocations() {
+            List<LocationInfo> locations = new ArrayList<LocationInfo>();
+
+            Cursor cursor = database.query(
+                    SqlEntry.TABLE_NAME,
+                    allColumns,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                LocationInfo location = cursorToLocationInfo(cursor);
+                locations.add(location);
+                cursor.moveToNext();
+            }
+            cursor.close();
+            return locations;
+        }
+
+        /**
+         * Takes a Cursor object pointing to a row of the locations database and parses the data into
+         * a new LocationInfo object, which is returned on completion.
+         * @param cursor Cursor object pointing to row containing LocationInfo data
+         * @return LocationInfo object containing row data pointed to by cursor
+         */
+        private LocationInfo cursorToLocationInfo(Cursor cursor) {
+            LocationInfo location = new LocationInfo();
+
+            location.setId( cursor.getInt(cursor.getColumnIndex(SqlEntry.COLUMN_ID)) );
+            location.setLongitude( cursor.getDouble(cursor.getColumnIndex(SqlEntry.COLUMN_LONGITUDE)) );
+            location.setLatitude( cursor.getDouble(cursor.getColumnIndex(SqlEntry.COLUMN_LATITUDE)) );
+            location.setStreet_name( cursor.getString(cursor.getColumnIndex(SqlEntry.COLUMN_STREET)) );
+            location.setOn_off_street( cursor.getString(cursor.getColumnIndex(SqlEntry.COLUMN_ON_OFF)) );
+            location.setTime( cursor.getString(cursor.getColumnIndex(SqlEntry.COLUMN_TIME)) );
+
+            return location;
+        }
+
 
 }
