@@ -43,7 +43,6 @@ public class Park_LocationDataSource {
             values.put(SqlEntry.COLUMN_ON_OFF, locationinfo.getOn_off_street());
             values.put(SqlEntry.COLUMN_TIME, locationinfo.getTime());
 
-            database.insert(SqlEntry.TABLE_NAME, null, values);
             long insertId = database.insert(SqlEntry.TABLE_NAME, null, values);
             Cursor cursor = database.query(
                     SqlEntry.TABLE_NAME,
@@ -58,17 +57,16 @@ public class Park_LocationDataSource {
 
         }
         public LocationInfo getLocationInfo(int id){
-            String [] lookupId = {String.valueOf(id)};
             Cursor cursor = database.query(
                     SqlEntry.TABLE_NAME,
                     allColumns,
-                    SqlEntry.COLUMN_ID + " = " + lookupId,
+                    SqlEntry.COLUMN_ID + " = " + id,
                     null,
                     null,
                     null,
                     null
             );
-            cursor.moveToPosition(id);
+            cursor.moveToFirst();
             LocationInfo location = new LocationInfo();
             location = cursorToLocationInfo(cursor);
             cursor.close();
