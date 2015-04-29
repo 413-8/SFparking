@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.view.View;
 
@@ -27,6 +28,10 @@ public class Park_LocationDataSource {
 
         public void write() {database = dbHelper.getWritableDatabase();}
 
+        public void open() throws SQLException {
+            database = dbHelper.getWritableDatabase();
+        }
+
         public void close() {dbHelper.close();}
 
         public void createLocationInfo(LocationInfo locationinfo){
@@ -38,7 +43,7 @@ public class Park_LocationDataSource {
             values.put(SqlEntry.COLUMN_ON_OFF, locationinfo.getOn_off_street());
             values.put(SqlEntry.COLUMN_TIME, locationinfo.getTime());
 
-            database.insert(SqlEntry.TABLE_NAME,null,values);
+            database.insert(SqlEntry.TABLE_NAME, null, values);
             long insertId = database.insert(SqlEntry.TABLE_NAME, null, values);
             Cursor cursor = database.query(
                     SqlEntry.TABLE_NAME,
