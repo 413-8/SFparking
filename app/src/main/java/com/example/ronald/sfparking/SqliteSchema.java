@@ -25,13 +25,26 @@ public final class SqliteSchema {
 
     protected static final String CREATE_TABLE = "CREATE TABLE " + SqlEntry.TABLE_NAME + "(" +
             SqlEntry.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-            SqlEntry.COLUMN_LONGITUDE + " TEXT, " +
-            SqlEntry.COLUMN_LATITUDE + " TEXT, " +
+            SqlEntry.COLUMN_LONGITUDE + " REAL, " +
+            SqlEntry.COLUMN_LATITUDE + " REAL, " +
             SqlEntry.COLUMN_STREET + " TEXT, " +
-            SqlEntry.COLUMN_ON_OFF + " TEXT," +
-            SqlEntry.COLUMN_TIME + " NUMERIC" +
+            SqlEntry.COLUMN_ON_OFF + " TEXT, " +
+            SqlEntry.COLUMN_TIME + " TEXT" +
             ");";
 
     protected static final String DELETE_TABLE = "DROP TABLE IF EXISTS " + SqlEntry.TABLE_NAME;
+
+    protected static String [] getColumns () {
+        String [] col = {
+                SqlEntry.COLUMN_ID,
+                SqlEntry.COLUMN_LONGITUDE,
+                SqlEntry.COLUMN_LATITUDE,
+                SqlEntry.COLUMN_STREET,
+                SqlEntry.COLUMN_ON_OFF,
+                SqlEntry.COLUMN_TIME
+        };
+
+        return col;
+    }
 
 }
