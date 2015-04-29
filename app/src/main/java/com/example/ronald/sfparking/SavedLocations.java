@@ -63,9 +63,6 @@ public class SavedLocations extends ActionBarActivity {
         String[] column = {"Longitude", "Latitude", "Street Name"};
         int rl = row.length;
         int cl = column.length;
-        //dataSource = new Park_LocationDataSource(this);
-        //dataSource.write();
-        //dataSource.read();
 
         dataSource = new Park_LocationDataSource(this);
         dataSource.open();
@@ -120,15 +117,7 @@ public class SavedLocations extends ActionBarActivity {
 
         List<LocationInfo> locations = new ArrayList<LocationInfo>();
         locations = dataSource.getAllLocations();
-        //LocationInfo locationInfo = new LocationInfo();
-        //locationInfo = dataSource.getLocationInfo(0);
-        //ArrayList <LocationInfo> Locations = new ArrayList<LocationInfo>();
-        //for(int i = 0; i < 4; i++ ){
-        //     Locations.add(i,dataSource.getLocationInfo(i));
-        //}
 
-        //tableRowParams.setMargins(1, 1, 1, 1); //space between cells (aka border thickness)
-        tableRowParams.weight = 1; //unknown
 
         //////////single column table
         for (int i = 0; i < 5; i++) {
@@ -141,7 +130,7 @@ public class SavedLocations extends ActionBarActivity {
                 textView.setBackgroundColor(Color.WHITE);
                 textView.setGravity(Gravity.CENTER);
                 tableRowParams.setMargins(0, 0, 0, 0); //for columns 1-j
-                System.out.println("pre switch");
+
                 switch (j) {
                     case 0:
                         tableRowParams.setMargins(0, 5, 0, 0);
@@ -161,10 +150,9 @@ public class SavedLocations extends ActionBarActivity {
                         System.out.println("case 3");
                         break;
                 }
-                System.out.println("post switch");
+
                 tableRow.addView(textView, tableRowParams);
                 tableLayout.addView(tableRow, tableLayoutParams);
-                System.out.println("end inner for");
 
             }
             TextView textView = new TextView(this);
