@@ -2,22 +2,15 @@ package com.example.ronald.sfparking;
 
 import android.content.Intent;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.location.LocationManager;
 import android.location.Criteria;
 import android.content.Context;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.TextView;
-
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -31,12 +24,6 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
-
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * The main method of the application.
@@ -184,9 +171,9 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
         /* request and parse sfpark api */
         try{
             parkLoc = new httpRequest(getApplicationContext()).execute(url).get();
-            StreetName = parkLoc.streetName;
-            OnOffSt = parkLoc.onOffStreet;
-            rates = parkLoc.rates;
+            StreetName = parkLoc.getStreetName();
+            OnOffSt = parkLoc.getOnOffStreet();
+            rates = parkLoc.getRates();
         } catch (Exception e){e.printStackTrace();}
 
 
@@ -206,14 +193,12 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
                     .position(latLng)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
 
-            dataTexview.setText("\tStreet Name: " + StreetName + "\n\tType: " + OnOffSt + " street." + "\n\tRate:" + rates);
+            dataTexview.setText("\tStreet Name: " + StreetName + "\n\tType: " + OnOffSt + " street." + "\n\tRates:\n" + rates);
 
 
         /*Set up panel when pin is dropped with data */
             setUpPanelPin(300);
         }
-
-
     }
 
     @Override
