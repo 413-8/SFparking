@@ -1,5 +1,7 @@
 package com.example.ronald.sfparking;
 
+import java.util.ArrayList;
+
 /**
  * Created by Pedro on 4/21/2015.
  * karl comment, this object stores data about the location from the request made to SFPark
@@ -8,13 +10,13 @@ package com.example.ronald.sfparking;
  * rates is the pricing information for the off-street parking if available.
  */
 public class ParkLocation {
-    public String onOffStreet = "No Data";
-    public String streetName = "No Data";
-    public String rates;
+    private String onOffStreet = "No Data";
+    private String streetName = "No Data";
+    private ArrayList<RateInfo> rates;
 
     public ParkLocation () {}
 
-    public ParkLocation(String onOffStreet, String stName, String rates) {
+    public ParkLocation(String onOffStreet, String stName, ArrayList<RateInfo> rates) {
         this.onOffStreet = onOffStreet;
         this.streetName = stName;
         this.rates = rates;
@@ -29,6 +31,11 @@ public class ParkLocation {
     }
 
     public String getRates(){
-        return rates;
+        StringBuilder result = new StringBuilder();
+        // Loop through elements.
+        for (RateInfo obj : rates) {
+            result.append(obj.toString());
+        }
+        return result.toString();
     }
 }
