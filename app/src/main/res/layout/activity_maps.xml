@@ -9,15 +9,76 @@
     sothree:umanoAnchorPoint="0.2"
     sothree:umanoParalaxOffset="25dp">
 
-
-    <!-- Main Content -->
-    <fragment
+    <!--main content-->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/map"
-        tools:context=".MapsActivity"
-        android:name="com.google.android.gms.maps.SupportMapFragment"/>
+        tools:context=".MapsActivity">
 
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+
+        <LinearLayout
+            android:id="@+id/locationMarker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="30dp"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/locationMarkertext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:minWidth="180dp"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:text=" Set your Location "
+                android:textColor="@android:color/white" />
+            <!--  android:background="@drawable/rounded_corner_map" -->
+
+
+            <ImageView
+                android:id="@+id/imageView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <!--    android:src="@drawable/add_marker" /> -->
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:background="@android:color/white"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="Selected Location"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="#28b54c" />
+
+            <TextView
+                android:id="@+id/addressText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Getting location"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </FrameLayout>
 
     <!-- Sliding Layout -->
     <LinearLayout
@@ -27,7 +88,7 @@
         android:divider="?android:dividerVertical"
         android:showDividers="beginning|middle|end">
 
-        <!-- when no pin, show park here and history button -->
+        <!-- Default drawer with 3 buttons -->
         <LinearLayout style="?android:buttonBarStyle"
             android:id="@+id/layout_no_pin"
             android:layout_width="match_parent"
@@ -40,10 +101,17 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Park Here"
+                android:text="Park"
                 android:onClick="parkButton"/>
             <Button style="?android:buttonBarButtonStyle"
                 android:id="@+id/hist_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Save"
+                android:onClick="historyButton"/>
+            <Button style="?android:buttonBarButtonStyle"
+                android:id="@+id/demo_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -52,43 +120,7 @@
         </LinearLayout>
 
 
-        <!-- Panel when pin is dropped -->
-        <TextView
-            android:id="@+id/data_textview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:layout_margin="10dp"
-            android:gravity="left"
-            android:textColor="#000000"
-            android:textSize="15sp"/>
 
-
-
-        <LinearLayout style="?android:buttonBarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:divider="?android:dividerHorizontal"
-            android:showDividers="beginning|middle|end">
-
-            <Button style="?android:buttonBarButtonStyle"
-                android:id="@+id/ok_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Save Pin"
-                android:onClick="savePinButton"/>
-
-            <Button style="?android:buttonBarButtonStyle"
-                android:id="@+id/cancel_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Remove Pin"
-                android:onClick="removePinButton"/>
-
-        </LinearLayout>
     </LinearLayout>
 
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>
