@@ -42,6 +42,7 @@ public class URLMaker {
                 .appendQueryParameter("long", longitude)
                 .appendQueryParameter("radius", radius)
                 .appendQueryParameter("uom", mile)
+                .appendQueryParameter("pricing", "yes")
                 .appendQueryParameter("response", response);
         String myUrl = builder.build().toString();
 
