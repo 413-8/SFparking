@@ -7,6 +7,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
  * Created by Pedro on 4/21/2015.
@@ -19,6 +20,7 @@ import java.io.InputStream;
  */
 public class SFParkXmlParser {
 
+    static ArrayList<RateInfo> rates = new ArrayList<>();
     //no namespaces
     private static final String ns = null;
 
@@ -40,7 +42,6 @@ public class SFParkXmlParser {
             in.close();
         }
     }
-
 
     /**
      * looks for AVL tag in XML file.  If success, calls readParkLocation to fill out the ParkLocation
@@ -70,8 +71,6 @@ public class SFParkXmlParser {
         return entry;
     }
 
-    //
-
     /**
      * looks for TYPE, NAME and RATES tags and then sets those fields in a new ParkLocation object.
      * @param parser the XmlPullParser to be used
@@ -84,7 +83,6 @@ public class SFParkXmlParser {
         parser.require(XmlPullParser.START_TAG, ns, "AVL");
         String onOffStreet = "";
         String stName = "";
-        String rates = "";
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
@@ -95,7 +93,7 @@ public class SFParkXmlParser {
             } else if (name.equals("NAME")) {
                 stName = readName(parser);
             } else if (name.equals("RATES")) {
-                //rates = readRates(parser);
+                rates = readRates(parser);
             } else {
                 skip(parser);
             }
@@ -117,10 +115,8 @@ public class SFParkXmlParser {
         return type;
     }
 
-    //
-
     /**
-     * process TYPE tags in the feed
+     * process NAME tags in the feed
      * @param parser the XmlPullParser to be used
      * @return the String tagged by NAME.
      * @throws XmlPullParserException
@@ -133,12 +129,69 @@ public class SFParkXmlParser {
         return name;
     }
 
-    //
+    /**
+     * process RATES tags in the feed
+     * @param parser the XmlPullParser to be used
+     * @return an ArrayList of RateInfo objects
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
+    private static ArrayList<RateInfo> readRates(XmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        ArrayList<RateInfo> ratesTemp = new ArrayList<>();
+        parser.require(XmlPullParser.START_TAG, ns, "RATES");
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if(parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
+            }
+            String name = parser.getName();
+            // looks for the RS tag
+            if (name.equals("RS")) {
+                ratesTemp.add(readRatesInfo(parser));
+            } else {
+                skip(parser);
+            }
+        }
+        return ratesTemp;
+    }
 
     /**
-     * process TEXT tags in the feed.
+     * looks for BEG, END, RATE and RQ tags
      * @param parser the XmlPullParser to be used
-     * @return the String tagged by TEXT.
+     * @return a RateInfo object
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
+    private static RateInfo readRatesInfo(XmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        parser.require(XmlPullParser.START_TAG, ns, "RS");
+
+        RateInfo temp = new RateInfo();
+
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
+            }
+            String name = parser.getName();
+            if (name.equals("BEG")) {
+                temp.setBeg(readText(parser));
+            } else if (name.equals("END")) {
+                temp.setEnd(readText(parser));
+            } else if (name.equals("RATE")) {
+                temp.setRate(readText(parser));
+            } else if (name.equals("RQ")) {
+                temp.setRq(readText(parser));
+            }else {
+                skip(parser);
+            }
+        }
+        return temp;
+    }
+
+    /**
+     * gets TEXT from the current tag in the feed.
+     * @param parser the XmlPullParser to be used
+     * @return the String of text.
      * @throws XmlPullParserException
      * @throws IOException
      */
@@ -150,8 +203,6 @@ public class SFParkXmlParser {
         }
         return result;
     }
-
-    // skip tags we don't need
 
     /**
      * skip unneeded tags.
