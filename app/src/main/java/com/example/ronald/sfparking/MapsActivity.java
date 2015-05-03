@@ -1,357 +1,350 @@
 package com.example.ronald.sfparking;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
+import com.example.ronald.sfparking.R.id;
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
-import android.support.v4.app.FragmentActivity;
+import android.location.LocationListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
-import android.location.LocationManager;
-import android.location.Criteria;
-import android.content.Context;
+import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 import android.widget.TextView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.FusedLocationProviderApi;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
-import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-/**
- * The main method of the application.
- */
-public class MapsActivity extends FragmentActivity implements OnMapLongClickListener, OnMapClickListener{
 
-    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-    private Marker mymarker;
-    private Location m = new Location("Marker");
-    private ParkLocation parkLoc;
-    private String url;
+public class MapsActivity extends FragmentActivity implements LocationListener,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
+    // A request to connect to Location Services
+    private LocationRequest mLocationRequest;
+    GoogleMap mGoogleMap;
+
 
     private SlidingUpPanelLayout slideUp_Layout;
-    private LinearLayout noPin_layout;
-    private TextView dataTexview;
-    private Park_LocationDataSource dataSource;
 
-    String longitude;
-    String latitude;
-    String radius = "0.007"; // approx. 37ft for accuracy
 
-    String response;
+    public static String ShopLat;
+    public static String ShopPlaceId;
+    public static String ShopLong;
+    // Stores the current instantiation of the location client in this object
+    private FusedLocationProviderApi mLocationClient;
+    public GoogleApiClient mGoogleApiClient;
+    boolean mUpdatesRequested = false;
+    private TextView markerText;
+    private LatLng center;
+    private LinearLayout markerLayout;
+    private Geocoder geocoder;
+    private List<Address> addresses;
+    private TextView Address;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_maps);
-        setUpMapIfNeeded();
-
-        dataSource = new Park_LocationDataSource(this);
-        dataSource.write();
-        dataSource.read();
         slideUp_Layout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-        noPin_layout = (LinearLayout) findViewById(R.id.layout_no_pin);
-        dataTexview = (TextView) findViewById(R.id.data_textview);
-        setUpPanelNoPin();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        setUpMapIfNeeded();
-    }
-
-    /**
-     * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
-     * installed) and the map has not already been instantiated.. This will ensure that we only ever
-     * call {@link #setUpMap()} once when {@link #mMap} is not null.
-     * <p/>
-     * If it isn't installed {@link SupportMapFragment} (and
-     * {@link com.google.android.gms.maps.MapView MapView}) will show a prompt for the user to
-     * install/update the Google Play services APK on their device.
-     * <p/>
-     * A user can return to this FragmentActivity after following the prompt and correctly
-     * installing/updating/enabling the Google Play services. Since the FragmentActivity may not
-     * have been completely destroyed during this process (it is likely that it would only be
-     * stopped or paused), {@link #onCreate(Bundle)} may not be called again so we should call this
-     * method in {@link #onResume()} to guarantee that it will be called.
-     */
-    private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
-        if (mMap == null) {
-            // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
 
 
-            // Check if we were successful in obtaining the map.
-            if (mMap != null) {
-                setUpMap();
-            }
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_maps);
+        markerText = (TextView) findViewById(R.id.locationMarkertext);
+        Address = (TextView) findViewById(id.addressText);
+        markerLayout = (LinearLayout) findViewById(R.id.locationMarker);
+        // Getting Google Play availability status
+        int status = GooglePlayServicesUtil
+                .isGooglePlayServicesAvailable(getBaseContext());
+
+        if (status != ConnectionResult.SUCCESS) { // Google Play Services are
+            // not available
+
+            int requestCode = 10;
+            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this,
+                    requestCode);
+            dialog.show();
+
+        } else { // Google Play Services are available
+
+            // Getting reference to the SupportMapFragment
+            // Create a new global location parameters object
+            mLocationRequest = LocationRequest.create();
+
+            /*
+             * Set the update interval
+             */
+            mLocationRequest.setInterval(GData.UPDATE_INTERVAL_IN_MILLISECONDS);
+
+            // Use high accuracy
+            mLocationRequest
+                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+            // Set the interval ceiling to one minute
+            mLocationRequest
+                    .setFastestInterval(GData.FAST_INTERVAL_CEILING_IN_MILLISECONDS);
+
+            // Note that location updates are off until the user turns them on
+            mUpdatesRequested = false;
+
+            /*
+             * Create a new location client, using the enclosing class to handle
+             * callbacks.
+             */
+            buildGoogleApiClient();
+            mGoogleApiClient.connect();
+
         }
+
+        // setUpPanel();
+
     }
 
-    /**
-     * This is where we can add markers or lines, add listeners or move the camera. In this case, we
-     * just add a marker near Africa.
-     * <p/>
-     * This should only be called once and when we are sure that {@link #mMap} is not null.
-     */
-    private void setUpMap() {
-
-
-        mMap.setMyLocationEnabled(true);
-        final UiSettings uiSettings = mMap.getUiSettings();
-        uiSettings.setCompassEnabled(true);
-
-        /* Center Map on Current Location */
-        centerMapOnLocation(getMyLocation());
-
-        mMap.setOnMapLongClickListener(this);
-        mMap.setOnMapClickListener(this);
-    }
-
-
-    /* Set up panel to Park here and History buttons. */
-    public void setUpPanelNoPin(){
-        if(noPin_layout.getVisibility() == LinearLayout.GONE)
-            noPin_layout.setVisibility(LinearLayout.VISIBLE);
+    public void setUpPanel() {
 
         slideUp_Layout.setPanelHeight(150);
         slideUp_Layout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         slideUp_Layout.setTouchEnabled(false);
     }
 
-    /* Set up panel to show information where pin is dropped + Save Pin and Remove Pin buttons */
-    public void setUpPanelPin(int size){
-        noPin_layout.setVisibility(LinearLayout.GONE);
-        slideUp_Layout.setPanelHeight(size);
-        slideUp_Layout.setTouchEnabled(true);
-        slideUp_Layout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
     }
 
+    protected GoogleApiClient getLocationApiClient(){
+        return new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
 
-    /**
-     * on a click-and-hold, a marker shall be placed on the map.
-     * the device will then make a request from the SFPark server for information about
-     * the location.
-     * this information will appear in an info window above the location.
-     * @param latLng the object holding data for latitude and longitude.
-     */
-    @Override
-    public void onMapLongClick(LatLng latLng) {
+    private void stupMap() {
+        try {
+            Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                    mGoogleApiClient);
 
-        /*center map on dropped marker */
-        m.setLatitude(latLng.latitude);
-        m.setLongitude(latLng.longitude);
-        centerMapOnLocation(m);
+            LatLng latLong;
+            mGoogleMap = ((MapFragment) getFragmentManager().findFragmentById(
+                    R.id.map)).getMap();
 
-
-        /* removes previous marker if exists */
-        if(mymarker != null)
-            mymarker.remove();
-
-        longitude = Double.toString(latLng.longitude);
-        latitude = Double.toString(latLng.latitude);
-
-        makeURLString(latitude, longitude, radius);
-
-        String StreetName = "";
-        String OnOffSt = "";
-        String rates = "";
-
-        /* request and parse sfpark api */
-        try{
-            parkLoc = new httpRequest(getApplicationContext()).execute(url).get();
-            StreetName = parkLoc.getStreetName();
-            OnOffSt = parkLoc.getOnOffStreet();
-            rates = parkLoc.getRates();
-        } catch (Exception e){e.printStackTrace();}
+            // Enabling MyLocation in Google Map
+            mGoogleMap.setMyLocationEnabled(true);
+            if (mLastLocation != null) {
+                latLong = new LatLng(mLastLocation
+                        .getLatitude(), mLastLocation
+                        .getLongitude());
+                ShopLat = mLastLocation.getLatitude() + "";
+                ShopLong = mLastLocation.getLongitude()
+                        + "";
 
 
-        /* add marker to the map: green if info available, red otherwise */
-        if (StreetName.equals("No Data")) {
-            mymarker = mMap.addMarker(new MarkerOptions()
-                    .position(latLng));
+            } else {
+                latLong = new LatLng(37.751864, -122.445840);
+            }
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(latLong).zoom(15).build();
 
-            dataTexview.setText("\tNo Data");
+            mGoogleMap.setMyLocationEnabled(true);
+            mGoogleMap.animateCamera(CameraUpdateFactory
+                    .newCameraPosition(cameraPosition));
+            // Clears all the existing markers
+            mGoogleMap.clear();
 
+            mGoogleMap.setOnCameraChangeListener(new OnCameraChangeListener() {
 
-        /*Set up panel when pin is dropped with No data*/
-            setUpPanelPin(160);
+                @Override
+                public void onCameraChange(CameraPosition arg0) {
+                    // TODO Auto-generated method stub
+                    center = mGoogleMap.getCameraPosition().target;
+
+                    markerText.setText(" Set your Location ");
+                    mGoogleMap.clear();
+                    markerLayout.setVisibility(View.VISIBLE);
+
+                    try {
+                        new GetLocationAsync(center.latitude, center.longitude)
+                                .execute();
+
+                    } catch (Exception e) {
+                    }
+                }
+            });
+
+            markerLayout.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    // TODO Auto-generated method stub
+
+                    try {
+
+                        LatLng latLng1 = new LatLng(center.latitude,
+                                center.longitude);
+
+                        Marker m = mGoogleMap.addMarker(new MarkerOptions()
+                                .position(latLng1)
+                                .title(" Set your Location ")
+                                .snippet("")
+                                .icon(BitmapDescriptorFactory
+                                        .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                        //    .fromResource(R.drawable.add_marker)));
+                        m.setDraggable(true);
+
+                        markerLayout.setVisibility(View.GONE);
+                    } catch (Exception e) {
+                    }
+
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        else {
-            mymarker = mMap.addMarker(new MarkerOptions()
-                    .position(latLng)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-
-            dataTexview.setText("\tStreet Name: " + StreetName + "\n\tType: " + OnOffSt + " street." + "\n\tRates:\n" + rates);
-
-
-        /*Set up panel when pin is dropped with data */
-            setUpPanelPin(300);
-        }
-    }
-
-    @Override
-    public void onMapClick(LatLng latLng) {
-        if(slideUp_Layout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)
-            slideUp_Layout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-    }
-
-    /* onClick function for each button */
-
-    /* Save Pin Button */
-    public void savePinButton (View view){
-        Location c = m;    // m is a data field in the MapsActivity class
-
-        if(c != null) {
-            LatLng l = new LatLng(c.getLatitude(), c.getLongitude());
-            LocationInfo locationInfo = new LocationInfo();
-            locationInfo.setLatitude(c.getLatitude());
-            locationInfo.setLongitude(c.getLongitude());
-            locationInfo.setOn_off_street(parkLoc.getOnOffStreet());
-            locationInfo.setStreet_name(parkLoc.getStreetName());
-            locationInfo.setTime("12:00");
-            dataSource.createLocationInfo(locationInfo);
-
-
-            mMap.addMarker(new MarkerOptions()
-                            .position(l)
-                            .title("I park here!!!")
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-            );
-        } else{
-            Context context = getApplicationContext();
-            CharSequence text = "Current Location Not Available!!!";
-            int duration = Toast.LENGTH_SHORT;
-
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
-        }
-
-    }
-
-    /* Remove Pin Button */
-    public void removePinButton(View view){
-        mymarker.remove();
-        setUpPanelNoPin();
-    }
-
-    /* I Parked Here Button */
-    public void parkButton(View view){
-        Location c = getMyLocation();
-
-        if(c != null) {
-            LatLng l = new LatLng(c.getLatitude(), c.getLongitude());
-            LocationInfo locationInfo = new LocationInfo();
-            locationInfo.setLatitude(c.getLatitude());
-            locationInfo.setLongitude(c.getLongitude());
-            locationInfo.setOn_off_street("On");
-            locationInfo.setStreet_name("Garfield");
-            locationInfo.setTime("8:00");
-            dataSource.createLocationInfo(locationInfo);
-
-
-            mMap.addMarker(new MarkerOptions()
-                            .position(l)
-                            .title("I park here!!!")
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-            );
-        } else{
-            Context context = getApplicationContext();
-            CharSequence text = "Current Location Not Available!!!";
-            int duration = Toast.LENGTH_SHORT;
-
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
-        }
-
     }
 
     /* History Button */
-    public void historyButton(View view){
+    public void historyButton(View view) {
 
         startActivity(new Intent(".SavedLocations"));
     }
 
-    /**
-     * recenters the google map view on the user's location.
-     */
-    public void centerMapOnLocation(Location location){
+    @Override
+    public void onLocationChanged(Location location) {
+        // TODO Auto-generated method stub
 
-     if (location != null)
-        {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(location.getLatitude(), location.getLongitude()), 13));
+    }
 
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Sets the center of the map to location user
-                    .zoom(15)                   // Sets the zoom
-                    .bearing(0)                // Sets the orientation of the camera to east
-                    .tilt(0)                   // Sets the tilt of the camera to 30 degrees
-                    .build();                   // Creates a CameraPosition from the builder
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult arg0) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        // TODO Auto-generated method stub
+        stupMap();
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    //@Override
+    public void onDisconnected() {
+        // TODO Auto-generated method stub
+
+    }
+
+    private class GetLocationAsync extends AsyncTask<String, Void, String> {
+
+        // boolean duplicateResponse;
+        double x, y;
+        StringBuilder str;
+
+        public GetLocationAsync(double latitude, double longitude) {
+            // TODO Auto-generated constructor stub
+
+            x = latitude;
+            y = longitude;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            Address.setText(" Getting location ");
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            try {
+                geocoder = new Geocoder(MapsActivity.this, Locale.ENGLISH);
+                addresses = geocoder.getFromLocation(x, y, 1);
+                str = new StringBuilder();
+                if (geocoder.isPresent()) {
+                    Address returnAddress = addresses.get(0);
+
+                    String localityString = returnAddress.getLocality();
+                    String city = returnAddress.getCountryName();
+                    String region_code = returnAddress.getCountryCode();
+                    String zipcode = returnAddress.getPostalCode();
+
+                    str.append(localityString + "");
+                    str.append(city + "" + region_code + "");
+                    str.append(zipcode + "");
+
+                } else {
+                }
+            } catch (IOException e) {
+                Log.e("tag", e.getMessage());
+            }
+            return null;
+
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            try {
+                Address.setText(addresses.get(0).getAddressLine(0)
+                        + addresses.get(0).getAddressLine(1) + " ");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+
         }
     }
-
-    /**
-     * retrieves data about the user's location from the GPS provider on the device's phone.
-     * if location wasn't found, check the next most accurate place for the current location.
-     * Otherwise, try GoogleMaps Location.
-     * @return the device's current location
-     */
-    private Location getMyLocation() {
-
-        LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        Location myLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-        if (myLocation == null) {
-            Criteria criteria = new Criteria();
-            criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-            // Finds a provider that matches the criteria
-            String provider = lm.getBestProvider(criteria, true);
-            // Use the provider to get the last known location
-            myLocation = lm.getLastKnownLocation(provider);
-
-            myLocation = mMap.getMyLocation();
-        }
-
-        return myLocation;
-    }
-
-//    private Location getPinLocation(Location pin) {
-//        String longitude = Double.toString(pin.getLongitude());
-//        String latitude = Double.toString(pin.getLatitude());
-//
-//        makeURLString(latitude, longitude, radius);
-//
-//        String StreetName = "";
-//        String OnOffSt = "";
-//        String rates = "";
-//
-//        /* request and parse sfpark api */
-//        try{
-//            ParkLocation parkLoc = new httpRequest(getApplicationContext()).execute(url).get();
-//            StreetName = parkLoc.stName;
-//            OnOffSt = parkLoc.onOffStreet;
-//            rates = parkLoc.rates;
-//        } catch (Exception e){e.printStackTrace();}
-//    }
-
-    private void makeURLString(String latitude, String longitude, String radius) {
-        URLMaker temp = URLMaker.getInstance();
-        url = temp.makeURL(latitude, longitude, radius);
-    }
-
-
 
 }
+
