@@ -81,18 +81,20 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // %%%%%%%%%%%%%%%%%%%%%%      ONCREATE     %%%%%%%%%%%%%%%%%%%%%%
     protected void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_maps);
+
         slideUp_Layout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
         noPin_layout = (LinearLayout) findViewById(R.id.layout_no_pin);
         dataTexview = (TextView) findViewById(R.id.data_textview);
         hover_layout = (LinearLayout) findViewById(id.hoverPin);
-        //setUpPanelNoPin();
+
         dataSource = new Park_LocationDataSource(this);
         dataSource.write();
         dataSource.read();
 
-
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        setUpPanelNoPin();
         //markerText = (TextView) findViewById(R.id.locationMarkertext);
         Address = (TextView) findViewById(id.addressText);
         markerLayout = (LinearLayout) findViewById(R.id.locationMarker);
@@ -139,7 +141,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
         }
 
-        // setUpPanel();
 
     }
 
