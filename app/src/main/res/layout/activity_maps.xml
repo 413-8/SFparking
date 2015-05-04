@@ -23,7 +23,56 @@
             android:layout_height="match_parent"
             />
 
-        <!---->
+        <!--a layer to hold an anchored pin-->
+        <LinearLayout
+            android:id="@+id/hoverPin"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_marginBottom="20dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageView
+                android:id="@+id/hoverPinHolder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/map_pin"
+                android:scaleX="0.08"
+                android:scaleY="0.08"/>
+        </LinearLayout>
+
+        <!--top bar with current address-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:background="@android:color/white"
+            android:orientation="vertical" >
+
+            <!--"Selected Location" text in green-->
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="Selected Location"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="#28b54c" />
+
+            <!--"Getting Location" or street address-->
+            <TextView
+                android:id="@+id/addressText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Getting location"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <!--The cyan floating marker that follows camera center-->
         <LinearLayout
             android:id="@+id/locationMarker"
             android:layout_width="wrap_content"
@@ -46,42 +95,16 @@
                 android:textColor="@android:color/black" />
                 android:background="@drawable/rounded_corner_map" -->
 
-
-            <ImageView
-                android:id="@+id/imageView1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                />
-            <!--    android:src="@drawable/add_marker" /> -->
+            <!--
+                        <ImageView
+                            android:id="@+id/imageView1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            />
+                           android:src="@drawable/add_marker" /> -->
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:background="@android:color/white"
-            android:orientation="vertical" >
 
-            <!--top bar with current address-->
-            <TextView
-                android:id="@+id/textView1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:text="Selected Location"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="#28b54c" />
-
-            <TextView
-                android:id="@+id/addressText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:ellipsize="end"
-                android:singleLine="true"
-                android:text="Getting location"
-                android:textSize="16sp" />
-        </LinearLayout>
     </FrameLayout>
 
     <!-- Sliding Layout -->

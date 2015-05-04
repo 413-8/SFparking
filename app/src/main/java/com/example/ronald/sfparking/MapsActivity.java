@@ -9,6 +9,9 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -54,6 +57,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     private SlidingUpPanelLayout slideUp_Layout;
     private LinearLayout noPin_layout;
+    private LinearLayout hover_layout;
     private Park_LocationDataSource dataSource;
     private TextView dataTexview;
 
@@ -80,6 +84,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         slideUp_Layout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
         noPin_layout = (LinearLayout) findViewById(R.id.layout_no_pin);
         dataTexview = (TextView) findViewById(R.id.data_textview);
+        hover_layout = (LinearLayout) findViewById(id.hoverPin);
         //setUpPanelNoPin();
         dataSource = new Park_LocationDataSource(this);
         dataSource.write();
@@ -164,6 +169,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     private void setupMap() {
         try {
+
             Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
 
@@ -203,10 +209,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
                     // markerText.setText(" Set your Location ");
                     mGoogleMap.clear();
-                    mGoogleMap.addMarker(new MarkerOptions()
+                    /*mGoogleMap.addMarker(new MarkerOptions()
                                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
                                     .position(arg0.target)
-                    );
+                    );*/
                     markerLayout.setVisibility(View.VISIBLE);
                   //  dataTexview.setText("\tNo Data");
 
@@ -232,14 +238,14 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                         LatLng latLng1 = new LatLng(center.latitude,
                                 center.longitude);
 
-                        Marker m = mGoogleMap.addMarker(new MarkerOptions()
+                        /*Marker m = mGoogleMap.addMarker(new MarkerOptions()
                                 .position(latLng1)
                                // .title(" Set your Location ")
                                 .snippet("")
                                 .icon(BitmapDescriptorFactory
                                         .defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
                         //    .fromResource(R.drawable.add_marker)));
-                        m.setDraggable(true);
+                        m.setDraggable(true);*/
 
                         markerLayout.setVisibility(View.GONE);
                     } catch (Exception e) {
