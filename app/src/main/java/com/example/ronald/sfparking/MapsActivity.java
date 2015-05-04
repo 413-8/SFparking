@@ -31,6 +31,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -72,7 +73,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        markerText = (TextView) findViewById(R.id.locationMarkertext);
+        //markerText = (TextView) findViewById(R.id.locationMarkertext);
         Address = (TextView) findViewById(id.addressText);
         markerLayout = (LinearLayout) findViewById(R.id.locationMarker);
         // Getting Google Play availability status
@@ -185,9 +186,15 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                     // TODO Auto-generated method stub
                     center = mGoogleMap.getCameraPosition().target;
 
-                    markerText.setText(" Set your Location ");
+                   // markerText.setText(" Set your Location ");
                     mGoogleMap.clear();
+                    mGoogleMap.addMarker(new MarkerOptions()
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
+                                    .position(arg0.target)
+                                    .title(arg0.toString())
+                    );
                     markerLayout.setVisibility(View.VISIBLE);
+
 
                     try {
                         new GetLocationAsync(center.latitude, center.longitude)
@@ -211,7 +218,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
                         Marker m = mGoogleMap.addMarker(new MarkerOptions()
                                 .position(latLng1)
-                                .title(" Set your Location ")
+                               // .title(" Set your Location ")
                                 .snippet("")
                                 .icon(BitmapDescriptorFactory
                                         .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
