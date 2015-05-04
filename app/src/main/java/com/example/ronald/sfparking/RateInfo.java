@@ -61,6 +61,7 @@ public class RateInfo {
         }
         else {
             temp.append("\t\t\t");
+            temp.append("$");
             temp.append(rate);
             temp.append(" ");
             temp.append(rq);
