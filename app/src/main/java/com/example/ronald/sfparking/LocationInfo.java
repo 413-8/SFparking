@@ -19,9 +19,22 @@ public class LocationInfo {
         longitude = _longitude;
         id = _id;
     }
+    //getters and setters
+    /**
+     *
+     * @return the id of the LocationInfo Object.
+     */
     public long getId(){return id;}
+    /**
+     *
+     * @param id the new ID of the LocationInfo Object.
+     */
     public void setId(int id){this.id = id;}
 
+    /**
+     *
+     * @return the time of the LocationInfo object
+     */
     public String getTime(){return time;}
     public String getStreetname(){return street_name;}
     public String getOn_off_street(){return on_off_street;}

@@ -284,7 +284,7 @@ public class MapsActivity extends FragmentActivity implements OnMapLongClickList
     }
 
     /**
-     * recenters the google map view on the user's location.
+     * Re-centers the google map view on the user's location.
      */
     public void centerMapOnLocation(Location location){
 

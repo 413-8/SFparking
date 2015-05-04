@@ -94,6 +94,14 @@ public class SavedLocations extends ActionBarActivity {
         textView.setText("Hello");
     }
 
+    /**
+     * Creates the layout of the data stored in the table to be shown in the view,
+     * @param rv the array of strings representing the rows requested to be viewed.
+     * @param cv the columns requested to be viewed.
+     * @param rowCount TODO:how will this be used?
+     * @param columnCount TODO: how will this be used?
+     * @return the Tablelayout created by the params.
+     */
     private TableLayout createTableLayout(String[] rv, String[] cv, int rowCount, int columnCount) {
         // 0) Get Display width
         Display display = getWindowManager().getDefaultDisplay();

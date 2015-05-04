@@ -29,11 +29,21 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    /**
+     * Creates a table in the database to be used by the application.
+     * @param database the Sqlite database to be created
+     */
     @Override
     public void onCreate(SQLiteDatabase database) {
         database.execSQL(SqliteSchema.CREATE_TABLE);
     }
 
+    /**
+     *if the app is updated, it will delete the old table and make a new one.
+     * @param database the database of the app.
+     * @param oldVer the old version of the app.
+     * @param newVer the new version of the app.
+     */
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVer, int newVer){
         Log.d(MySQLiteHelper.class.getName(), "Upgrading database from version " + oldVer + " to " +
