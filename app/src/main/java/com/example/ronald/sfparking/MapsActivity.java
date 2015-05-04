@@ -7,6 +7,7 @@ import java.util.Locale;
 import com.example.ronald.sfparking.R.id;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -20,6 +21,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -39,16 +41,22 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// %%%%%%%%%%%%%%%%%%%%%%   MAPS ACTIVITY   %%%%%%%%%%%%%%%%%%%%%%
 public class MapsActivity extends FragmentActivity implements LocationListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
+
     // A request to connect to Location Services
     private LocationRequest mLocationRequest;
     GoogleMap mGoogleMap;
 
 
     private SlidingUpPanelLayout slideUp_Layout;
+    private LinearLayout noPin_layout;
+    private Park_LocationDataSource dataSource;
+    private TextView dataTexview;
+
 
 
     public static String ShopLat;
@@ -65,10 +73,17 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     private List<Address> addresses;
     private TextView Address;
 
-    @Override
+
+    // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    // %%%%%%%%%%%%%%%%%%%%%%      ONCREATE     %%%%%%%%%%%%%%%%%%%%%%
     protected void onCreate(Bundle savedInstanceState) {
         slideUp_Layout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-
+        noPin_layout = (LinearLayout) findViewById(R.id.layout_no_pin);
+        dataTexview = (TextView) findViewById(R.id.data_textview);
+        //setUpPanelNoPin();
+        dataSource = new Park_LocationDataSource(this);
+        dataSource.write();
+        dataSource.read();
 
 
         super.onCreate(savedInstanceState);
@@ -97,7 +112,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             /*
              * Set the update interval
              */
-            mLocationRequest.setInterval(GData.UPDATE_INTERVAL_IN_MILLISECONDS);
+            mLocationRequest.setInterval(10000);
 
             // Use high accuracy
             mLocationRequest
@@ -105,7 +120,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
             // Set the interval ceiling to one minute
             mLocationRequest
-                    .setFastestInterval(GData.FAST_INTERVAL_CEILING_IN_MILLISECONDS);
+                    .setFastestInterval(60000);
 
             // Note that location updates are off until the user turns them on
             mUpdatesRequested = false;
@@ -147,7 +162,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                 .build();
     }
 
-    private void stupMap() {
+    private void setupMap() {
         try {
             Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
@@ -186,19 +201,20 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                     // TODO Auto-generated method stub
                     center = mGoogleMap.getCameraPosition().target;
 
-                   // markerText.setText(" Set your Location ");
+                    // markerText.setText(" Set your Location ");
                     mGoogleMap.clear();
                     mGoogleMap.addMarker(new MarkerOptions()
                                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
                                     .position(arg0.target)
-                                    .title(arg0.toString())
                     );
                     markerLayout.setVisibility(View.VISIBLE);
+                  //  dataTexview.setText("\tNo Data");
 
 
                     try {
                         new GetLocationAsync(center.latitude, center.longitude)
                                 .execute();
+
 
                     } catch (Exception e) {
                     }
@@ -221,7 +237,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                                // .title(" Set your Location ")
                                 .snippet("")
                                 .icon(BitmapDescriptorFactory
-                                        .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                                        .defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
                         //    .fromResource(R.drawable.add_marker)));
                         m.setDraggable(true);
 
@@ -237,12 +253,63 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         }
     }
 
+    /* Set up panel to Park here and History buttons. */
+    public void setUpPanelNoPin(){
+        //if(noPin_layout.getVisibility() == LinearLayout.GONE)
+          //  noPin_layout.setVisibility(LinearLayout.VISIBLE);
+
+        slideUp_Layout.setPanelHeight(150);
+        slideUp_Layout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        slideUp_Layout.setTouchEnabled(false);
+    }
+
+    /* Set up panel to show information where pin is dropped + Save Pin and Remove Pin buttons */
+    public void setUpPanelPin(int size){
+        noPin_layout.setVisibility(LinearLayout.GONE);
+        slideUp_Layout.setPanelHeight(size);
+        slideUp_Layout.setTouchEnabled(true);
+        slideUp_Layout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+    }
+
+    // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    // %%%%%%%%%%%%%%%%%%%%%%  BUTTON HANDLERS  %%%%%%%%%%%%%%%%%%%%%%
+    /* Parked Button */
+    public void parkButton(View view){
+
+        if(center != null) {
+            LocationInfo locationInfo = new LocationInfo();
+            locationInfo.setLatitude(center.latitude);
+            locationInfo.setLongitude(center.longitude);
+            locationInfo.setOn_off_street("On");
+            locationInfo.setStreet_name("Garfield");
+            locationInfo.setTime("8:00");
+            dataSource.createLocationInfo(locationInfo);
+
+
+            mGoogleMap.addMarker(new MarkerOptions()
+                            .position(center)
+                            .title("I park here!!!")
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+            );
+        } else{
+            Context context = getApplicationContext();
+            CharSequence text = "Current Location Not Available!!!";
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
+
+    }
+
     /* History Button */
     public void historyButton(View view) {
 
         startActivity(new Intent(".SavedLocations"));
     }
 
+
+    //empty inherited methods
     @Override
     public void onLocationChanged(Location location) {
         // TODO Auto-generated method stub
@@ -276,7 +343,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     @Override
     public void onConnected(Bundle connectionHint) {
         // TODO Auto-generated method stub
-        stupMap();
+        setupMap();
 
     }
 
@@ -290,6 +357,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         // TODO Auto-generated method stub
 
     }
+    //end empty inherited methods
 
     private class GetLocationAsync extends AsyncTask<String, Void, String> {
 
