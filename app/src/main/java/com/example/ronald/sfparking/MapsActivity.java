@@ -301,7 +301,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // %%%%%%%%%%%%%%%%%%%%%%  BUTTON HANDLERS  %%%%%%%%%%%%%%%%%%%%%%
-    /* Parked Button */
+    ////////// Parked Button
     public void parkButton(View view) {
         mGoogleMap.clear();
         if (latlngAtCameraCenter != null) {
@@ -330,7 +330,32 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     }
 
-    /* History Button */
+    ////////// Save Button
+    public void saveButton (View view){
+        //Location c = m;    // m is a data field in the MapsActivity class
+
+        if(latlngAtCameraCenter != null) {
+            LocationInfo locationInfo = new LocationInfo();
+            locationInfo.setLatitude(latlngAtCameraCenter.latitude);
+            locationInfo.setLongitude(latlngAtCameraCenter.longitude);
+            locationInfo.setOn_off_street(parkLoc.getOnOffStreet());
+            locationInfo.setStreet_name(parkLoc.getStreetName());
+            locationInfo.setTime("12:00");
+            dataSource.createLocationInfo(locationInfo);
+
+
+        } else{
+            Context context = getApplicationContext();
+            CharSequence text = "Location Not Available";
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
+
+    }
+
+    ////////// History Button
     public void historyButton(View view) {
 
         startActivity(new Intent(".SavedLocations"));
@@ -399,8 +424,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         StringBuilder str;
 
         public GetLocationAsync(double latitude, double longitude) {
-            // TODO Auto-generated constructor stub
-
             x = latitude;
             y = longitude;
         }
