@@ -148,7 +148,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Save"
-                android:onClick="historyButton"/>
+                android:onClick="saveButton"/>
             <Button style="?android:buttonBarButtonStyle"
                 android:id="@+id/history_button"
                 android:layout_width="0dp"
