@@ -5,13 +5,10 @@ import java.util.List;
 import java.util.Locale;
 
 import com.example.ronald.sfparking.R.id;
-import android.app.Activity;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -21,7 +18,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,11 +32,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -50,32 +45,31 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
+    // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    // %%%%%%%%%%%%%%%%%%%%%%    DATA FIELDS    %%%%%%%%%%%%%%%%%%%%%%
     // A request to connect to Location Services
     private LocationRequest mLocationRequest;
     GoogleMap mGoogleMap;
 
-
-    private SlidingUpPanelLayout slideUp_Layout;
-    private LinearLayout noPin_layout;
+    private SlidingUpPanelLayout sliding_layout_container;
+    private LinearLayout sliding_up_layout;
     private LinearLayout hover_layout;
     private Park_LocationDataSource dataSource;
-    private TextView dataTexview;
+    private ParkLocation parkLoc;
+    private TextView park_data_text_view;
+    private String sfparkQueryUrl;
+    String radius = "0.007"; // approx. 37ft for accuracy
 
-
-
-    public static String ShopLat;
-    public static String ShopPlaceId;
-    public static String ShopLong;
     // Stores the current instantiation of the location client in this object
     private FusedLocationProviderApi mLocationClient;
     public GoogleApiClient mGoogleApiClient;
     boolean mUpdatesRequested = false;
     private TextView markerText;
-    private LatLng center;
-    private LinearLayout markerLayout;
+    private LatLng latlngAtCameraCenter;
+    //  private LinearLayout markerLayout;
     private Geocoder geocoder;
-    private List<Address> addresses;
-    private TextView Address;
+    private List<Address> addressesFromGeocoder;
+    private TextView addressAtCenterPin;
 
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -85,19 +79,19 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        slideUp_Layout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-        noPin_layout = (LinearLayout) findViewById(R.id.layout_no_pin);
-        dataTexview = (TextView) findViewById(R.id.data_textview);
+        sliding_layout_container = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout_container);
+        sliding_up_layout = (LinearLayout) findViewById(R.id.sliding_up_layout);
+        park_data_text_view = (TextView) findViewById(R.id.park_data_text_view);
         hover_layout = (LinearLayout) findViewById(id.hoverPin);
 
         dataSource = new Park_LocationDataSource(this);
         dataSource.write();
         dataSource.read();
 
-        setUpPanelNoPin();
+        setUpPanelDefault();
         //markerText = (TextView) findViewById(R.id.locationMarkertext);
-        Address = (TextView) findViewById(id.addressText);
-        markerLayout = (LinearLayout) findViewById(R.id.locationMarker);
+        addressAtCenterPin = (TextView) findViewById(id.addressText);
+        //    markerLayout = (LinearLayout) findViewById(R.id.locationMarker);
         // Getting Google Play availability status
         int status = GooglePlayServicesUtil
                 .isGooglePlayServicesAvailable(getBaseContext());
@@ -144,13 +138,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     }
 
-    public void setUpPanel() {
-
-        slideUp_Layout.setPanelHeight(150);
-        slideUp_Layout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-        slideUp_Layout.setTouchEnabled(false);
-    }
-
 
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -160,7 +147,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                 .build();
     }
 
-    protected GoogleApiClient getLocationApiClient(){
+    protected GoogleApiClient getLocationApiClient() {
         return new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -184,9 +171,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                 latLong = new LatLng(mLastLocation
                         .getLatitude(), mLastLocation
                         .getLongitude());
-                ShopLat = mLastLocation.getLatitude() + "";
-                ShopLong = mLastLocation.getLongitude()
-                        + "";
 
 
             } else {
@@ -199,94 +183,131 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             mGoogleMap.animateCamera(CameraUpdateFactory
                     .newCameraPosition(cameraPosition));
             // Clears all the existing markers
-            mGoogleMap.clear();
+            //mGoogleMap.clear();
+
 
             mGoogleMap.setOnCameraChangeListener(new OnCameraChangeListener() {
+                private int CAMERA_MOVE_REACT_THRESHOLD_MS = 500;
+                private long lastCallMs = Long.MIN_VALUE;
 
                 @Override
                 public void onCameraChange(CameraPosition arg0) {
-                    // TODO Auto-generated method stub
-                    center = mGoogleMap.getCameraPosition().target;
+                    final long snap = System.currentTimeMillis();
+                    if (lastCallMs + CAMERA_MOVE_REACT_THRESHOLD_MS > snap) {
+                        lastCallMs = snap;
+                        return;
+                    }
 
-                    // markerText.setText(" Set your Location ");
-                    mGoogleMap.clear();
-                    /*mGoogleMap.addMarker(new MarkerOptions()
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
-                                    .position(arg0.target)
-                    );*/
-                    markerLayout.setVisibility(View.VISIBLE);
-                  //  dataTexview.setText("\tNo Data");
+                    latlngAtCameraCenter = mGoogleMap.getCameraPosition().target;
 
+                    //  markerLayout.setVisibility(View.VISIBLE);
+                    park_data_text_view.setText("\tNo Data");
+                    park_data_text_view.setVisibility(View.VISIBLE);
+                    setUpPanelWithoutData();
 
                     try {
-                        new GetLocationAsync(center.latitude, center.longitude)
+                        new GetLocationAsync(latlngAtCameraCenter.latitude,
+                                latlngAtCameraCenter.longitude)
                                 .execute();
 
 
                     } catch (Exception e) {
                     }
+                    makeURLString(Double.toString(latlngAtCameraCenter.latitude),
+                            Double.toString(latlngAtCameraCenter.longitude),
+                            radius);
+                    String streetName = "";
+                    String onOffSt = "";
+                    String rates = "";
+
+                    /* request and parse sfpark api */
+                    try{
+                        parkLoc = new httpRequest(getApplicationContext()).execute(sfparkQueryUrl).get();
+                        streetName = parkLoc.getStreetName();
+                        onOffSt = parkLoc.getOnOffStreet();
+                        rates = parkLoc.getRates();
+                    } catch (Exception e){e.printStackTrace();}
+
+                    // add marker to the map: green if info available, red otherwise
+                    if (streetName.equals("No Data")) {
+
+                        park_data_text_view.setText("\tNo Data");
+
+                        // Set up panel when pin is dropped with No data
+                        setUpPanelWithoutData();
+                    }
+                    else {
+                        park_data_text_view.setText("\tStreet Name: "
+                                + streetName + "\n\tType: "
+                                + onOffSt
+                                + " street."
+                                + "\n\tRates:\n"
+                                + rates);
+
+
+                        // Set up panel when pin is dropped with data
+                        setUpPanelWithData();
+                    }
+                    lastCallMs = snap;
                 }
             });
 
-            markerLayout.setOnClickListener(new OnClickListener() {
+          /*  markerLayout.setOnClickListener(new OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
-                    // TODO Auto-generated method stub
 
                     try {
 
-                        LatLng latLng1 = new LatLng(center.latitude,
-                                center.longitude);
+                        LatLng latLng1 = new LatLng(latlngAtCameraCenter.latitude,
+                                latlngAtCameraCenter.longitude);
 
-                        /*Marker m = mGoogleMap.addMarker(new MarkerOptions()
-                                .position(latLng1)
-                               // .title(" Set your Location ")
-                                .snippet("")
-                                .icon(BitmapDescriptorFactory
-                                        .defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
-                        //    .fromResource(R.drawable.add_marker)));
-                        m.setDraggable(true);*/
 
                         markerLayout.setVisibility(View.GONE);
                     } catch (Exception e) {
                     }
 
                 }
-            });
+            }); */
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    /* Set up panel to Park here and History buttons. */
-    public void setUpPanelNoPin(){
-        //if(noPin_layout.getVisibility() == LinearLayout.GONE)
-          //  noPin_layout.setVisibility(LinearLayout.VISIBLE);
+    public void setUpPanelDefault() {
 
-        slideUp_Layout.setPanelHeight(150);
-        slideUp_Layout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-        slideUp_Layout.setTouchEnabled(false);
+        sliding_layout_container.setPanelHeight(150);
+        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        sliding_layout_container.setTouchEnabled(false);
+    }
+
+    /* Set up panel to Park here and History buttons. */
+    public void setUpPanelWithData() {
+        //if(sliding_up_layout.getVisibility() == LinearLayout.GONE)
+        //  sliding_up_layout.setVisibility(LinearLayout.VISIBLE);
+
+        sliding_layout_container.setPanelHeight(300);
+        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+        sliding_layout_container.setTouchEnabled(true);
     }
 
     /* Set up panel to show information where pin is dropped + Save Pin and Remove Pin buttons */
-    public void setUpPanelPin(int size){
-        noPin_layout.setVisibility(LinearLayout.GONE);
-        slideUp_Layout.setPanelHeight(size);
-        slideUp_Layout.setTouchEnabled(true);
-        slideUp_Layout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+    public void setUpPanelWithoutData() {
+        sliding_layout_container.setPanelHeight(100);
+        sliding_layout_container.setTouchEnabled(true);
+        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
     }
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // %%%%%%%%%%%%%%%%%%%%%%  BUTTON HANDLERS  %%%%%%%%%%%%%%%%%%%%%%
     /* Parked Button */
-    public void parkButton(View view){
-
-        if(center != null) {
+    public void parkButton(View view) {
+        mGoogleMap.clear();
+        if (latlngAtCameraCenter != null) {
             LocationInfo locationInfo = new LocationInfo();
-            locationInfo.setLatitude(center.latitude);
-            locationInfo.setLongitude(center.longitude);
+            locationInfo.setLatitude(latlngAtCameraCenter.latitude);
+            locationInfo.setLongitude(latlngAtCameraCenter.longitude);
             locationInfo.setOn_off_street("On");
             locationInfo.setStreet_name("Garfield");
             locationInfo.setTime("8:00");
@@ -294,11 +315,11 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
 
             mGoogleMap.addMarker(new MarkerOptions()
-                            .position(center)
-                            .title("I park here!!!")
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                            .position(latlngAtCameraCenter)
+                            .title("I parked here")
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
             );
-        } else{
+        } else {
             Context context = getApplicationContext();
             CharSequence text = "Current Location Not Available!!!";
             int duration = Toast.LENGTH_SHORT;
@@ -313,6 +334,11 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     public void historyButton(View view) {
 
         startActivity(new Intent(".SavedLocations"));
+    }
+
+    private void makeURLString(String latitude, String longitude, String radius) {
+        URLMaker temp = URLMaker.getInstance();
+        sfparkQueryUrl = temp.makeURL(latitude, longitude, radius);
     }
 
 
@@ -381,7 +407,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
         @Override
         protected void onPreExecute() {
-            Address.setText(" Getting location ");
+            addressAtCenterPin.setText(" Getting location ");
         }
 
         @Override
@@ -389,10 +415,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
             try {
                 geocoder = new Geocoder(MapsActivity.this, Locale.ENGLISH);
-                addresses = geocoder.getFromLocation(x, y, 1);
+                addressesFromGeocoder = geocoder.getFromLocation(x, y, 1);
                 str = new StringBuilder();
                 if (geocoder.isPresent()) {
-                    Address returnAddress = addresses.get(0);
+                    Address returnAddress = addressesFromGeocoder.get(0);
 
                     String localityString = returnAddress.getLocality();
                     String city = returnAddress.getCountryName();
@@ -415,8 +441,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         @Override
         protected void onPostExecute(String result) {
             try {
-                Address.setText(addresses.get(0).getAddressLine(0)
-                        + addresses.get(0).getAddressLine(1) + " ");
+                addressAtCenterPin.setText(addressesFromGeocoder.get(0).getAddressLine(0)
+                        + addressesFromGeocoder.get(0).getAddressLine(1) + " ");
             } catch (Exception e) {
                 e.printStackTrace();
             }
