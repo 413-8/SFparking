@@ -18,23 +18,27 @@ import android.widget.Toast;
  */
 public class SplashPage extends Activity {
 
+    //A progressDialog object
     private ProgressDialog progressDialog;
+
     final Context sp = this;
 
+    //Called when the app starts up
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_splash);
 
+        //LocationManager object
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
+        //Check to see if GPS is enabled, if not then prompt the user to enable it
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
             Toast.makeText(this, "Gps is enabled on your device", Toast.LENGTH_SHORT);
+            new LoadViewTask().execute();
         } else{
+            setContentView(R.layout.activity_splash);
             showGPSDisabledAlert();
         }
-
-        new LoadViewTask().execute();
     }
 
     /*GPS Alert*/
@@ -58,10 +62,14 @@ public class SplashPage extends Activity {
 
     /*Background loading*/
     private class LoadViewTask extends AsyncTask<Void, Integer, Void> {
+
+        //Execute before the background starts loading
         @Override
         protected void onPreExecute(){
+
+            setContentView(R.layout.activity_splash);
             progressDialog = new ProgressDialog(SplashPage.this);
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            //progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             //progressDialog.setTitle("Loading...");
             progressDialog.setMessage("Loading, please wait...");
             progressDialog.setCancelable(false);
@@ -71,19 +79,14 @@ public class SplashPage extends Activity {
             //progressDialog.show();
         }
 
+        //Loads the database and map then starts up the app
         @Override
         protected Void doInBackground(Void... params){
             try {
                 synchronized (this){
-                    //int counter = 0;
-
-                    //while(counter <=4 ){
-                    for (int counter = 0; counter <=4; counter++) {
-                        wait(850);
-                        //publishProgress(counter * 25);
-                    }
-                    ///  counter ++;
-                    //publishProgress(counter * 25);
+                    //for (int counter = 0; counter <=1; counter++) {
+                        wait(2000);
+                      //  publishProgress(counter * 25);
                     //}
                 }
             } catch (Exception e){
@@ -95,36 +98,21 @@ public class SplashPage extends Activity {
             return null;
         }
 
+        //Updates the progressDialog
         @Override
         protected void onProgressUpdate(Integer... values){
             progressDialog.setProgress(values[0]);
             setContentView(R.layout.activity_splash);
         }
 
+        //Dismisses the progress Dialog
         @Override
         protected void onPostExecute(Void result){
             progressDialog.dismiss();
-            //setContentView(R.layout.activity_splash);
+            setContentView(R.layout.activity_splash);
         }
     }
-    /*final Context sp = this;
-    Thread background = new Thread() {
-        public void run() {
 
-            try {
-                // Thread will sleep for 1 seconds
-                sleep(1000);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }finally{
-                Intent open = new Intent(sp, MapsActivity.class);
-                startActivity(open);
-            }
-        }
-    };
-    background.start();
-}*/
     protected void onPause(){
         super.onPause();
         finish();
