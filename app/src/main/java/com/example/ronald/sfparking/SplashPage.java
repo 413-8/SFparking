@@ -68,7 +68,7 @@ public class SplashPage extends Activity {
             progressDialog.setIndeterminate(false);
             progressDialog.setMax(100);
             progressDialog.setProgress(0);
-            progressDialog.show();
+            //progressDialog.show();
         }
 
         @Override
@@ -80,7 +80,7 @@ public class SplashPage extends Activity {
                     //while(counter <=4 ){
                     for (int counter = 0; counter <=4; counter++) {
                         wait(850);
-                        publishProgress(counter * 25);
+                        //publishProgress(counter * 25);
                     }
                     ///  counter ++;
                     //publishProgress(counter * 25);
