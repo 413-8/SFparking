@@ -57,18 +57,18 @@ public class SplashPage extends Activity {
     }
 
     /*Background loading*/
-    private class LoadViewTask extends AsyncTask<Void, Integer, Void>{
+    private class LoadViewTask extends AsyncTask<Void, Integer, Void> {
         @Override
         protected void onPreExecute(){
             progressDialog = new ProgressDialog(SplashPage.this);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            progressDialog.setTitle("Loading...");
-            progressDialog.setMessage("Loading application View, please wait...");
+            //progressDialog.setTitle("Loading...");
+            progressDialog.setMessage("Loading, please wait...");
             progressDialog.setCancelable(false);
             progressDialog.setIndeterminate(false);
             progressDialog.setMax(100);
-            //progressDialog.setProgress(0);
-            //progressDialog.show();
+            progressDialog.setProgress(0);
+            progressDialog.show();
         }
 
         @Override
@@ -78,7 +78,10 @@ public class SplashPage extends Activity {
                     //int counter = 0;
 
                     //while(counter <=4 ){
-                    wait(850);
+                    for (int counter = 0; counter <=4; counter++) {
+                        wait(850);
+                        publishProgress(counter * 25);
+                    }
                     ///  counter ++;
                     //publishProgress(counter * 25);
                     //}
@@ -95,34 +98,35 @@ public class SplashPage extends Activity {
         @Override
         protected void onProgressUpdate(Integer... values){
             progressDialog.setProgress(values[0]);
+            setContentView(R.layout.activity_splash);
         }
 
         @Override
         protected void onPostExecute(Void result){
             progressDialog.dismiss();
-            setContentView(R.layout.activity_splash);
+            //setContentView(R.layout.activity_splash);
         }
     }
-        /*final Context sp = this;
-        Thread background = new Thread() {
-            public void run() {
+    /*final Context sp = this;
+    Thread background = new Thread() {
+        public void run() {
 
-                try {
-                    // Thread will sleep for 1 seconds
-                    sleep(1000);
+            try {
+                // Thread will sleep for 1 seconds
+                sleep(1000);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }finally{
-                    Intent open = new Intent(sp, MapsActivity.class);
-                    startActivity(open);
-                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }finally{
+                Intent open = new Intent(sp, MapsActivity.class);
+                startActivity(open);
             }
-        };
-        background.start();
-    }
+        }
+    };
+    background.start();
+}*/
     protected void onPause(){
         super.onPause();
         finish();
-    }*/
+    }
 }
