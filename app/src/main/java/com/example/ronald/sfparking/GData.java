@@ -1,5 +1,8 @@
 package com.example.ronald.sfparking;
 
+/**
+ * Holds time variables for refreshing location data.
+ */
 public class GData {
 
     // Milliseconds per second

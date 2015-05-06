@@ -22,14 +22,26 @@ public class ParkLocation {
         this.rates = rates;
     }
 
+    /**
+     *
+     * @return the on/off street status of the parking for the ParkLocation object.
+     */
     public String getOnOffStreet(){
         return onOffStreet;
     }
 
+    /**
+     *
+     * @return the street name held by the ParkLocation object.
+     */
     public String getStreetName(){
         return streetName;
     }
 
+    /**
+     *
+     * @return the rates (costs) of parking for the ParkLocation object
+     */
     public String getRates(){
         StringBuilder result = new StringBuilder();
         // Loop through elements.

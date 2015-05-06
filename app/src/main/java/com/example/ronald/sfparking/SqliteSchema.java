@@ -13,6 +13,9 @@ public final class SqliteSchema {
 
     public SqliteSchema () {}
 
+    /**
+     * holds the names of the columns in the location history table.
+     */
     public static abstract class SqlEntry implements BaseColumns {
         public static final String TABLE_NAME = "parking_info";
         public static final String COLUMN_ID = "id";
@@ -34,6 +37,10 @@ public final class SqliteSchema {
 
     protected static final String DELETE_TABLE = "DROP TABLE IF EXISTS " + SqlEntry.TABLE_NAME;
 
+    /**
+     *
+     * @return a string array with each element corresponding to a column name in order left-to-right.
+     */
     protected static String [] getColumns () {
         String [] col = {
                 SqlEntry.COLUMN_ID,

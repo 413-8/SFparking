@@ -41,6 +41,11 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // %%%%%%%%%%%%%%%%%%%%%%   MAPS ACTIVITY   %%%%%%%%%%%%%%%%%%%%%%
+
+/**
+ * The initial activity of the app.
+ * displays a google map with information about the current location.
+ */
 public class MapsActivity extends FragmentActivity implements LocationListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -141,7 +146,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     }
 
-
+    /**
+     * Builds the google API client to add the API to the app build.
+     */
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -150,6 +157,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                 .build();
     }
 
+    /**
+     *
+     * @return the GoogleApiClient object built for the app.
+     */
     protected GoogleApiClient getLocationApiClient() {
         return new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -158,6 +169,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                 .build();
     }
 
+    /**
+     * Creates the google map to be used as the initial view.
+     */
     private void setupMap() {
         try {
 
@@ -284,7 +298,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         sliding_layout_container.setTouchEnabled(false);
     }
 
-    /* Set up panel to Park here and History buttons. */
+    /** Sets up panel to Park here and History buttons. */
     public void setUpPanelWithData() {
         //if(sliding_up_layout.getVisibility() == LinearLayout.GONE)
         //  sliding_up_layout.setVisibility(LinearLayout.VISIBLE);
@@ -294,7 +308,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         sliding_layout_container.setTouchEnabled(true);
     }
 
-    /* Set up panel to show information where pin is dropped + Save Pin and Remove Pin buttons */
+    /** Sets up panel to show information where pin is dropped + Save Pin and Remove Pin buttons */
     public void setUpPanelWithoutData() {
         sliding_layout_container.setPanelHeight(100);
         sliding_layout_container.setTouchEnabled(true);
@@ -419,22 +433,40 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     }
     //end empty inherited methods
 
+    /**
+     * Uses a Geocoder object to get latitude and longitude of the current location asynchronously.
+     */
     private class GetLocationAsync extends AsyncTask<String, Void, String> {
 
         // boolean duplicateResponse;
         double x, y;
         StringBuilder str;
 
+
         public GetLocationAsync(double latitude, double longitude) {
             x = latitude;
             y = longitude;
         }
 
+        /**
+         * invoked on the UI thread before the task is executed. This step is normally used to setup
+         * the task, for instance by showing a progress bar in the user interface.
+         */
         @Override
         protected void onPreExecute() {
             addressAtCenterPin.setText(" Getting location ");
         }
 
+        /**
+         * invoked on the background thread immediately after onPreExecute() finishes executing.
+         * This step is used to perform background computation that can take a long time. The
+         * parameters of the asynchronous task are passed to this step. The result of the
+         * computation must be returned by this step and will be passed back to the last step. This
+         * step can also use publishProgress(Progress...) to publish one or more units of progress.
+         * These values are published on the UI thread, in the onProgressUpdate(Progress...) step.
+         * @param params the parameters of the asynchronous task.
+         * @return null for now.
+         */
         @Override
         protected String doInBackground(String... params) {
 
@@ -463,6 +495,11 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
         }
 
+        /**
+         * invoked on the UI thread after the background computation finishes. The result of the
+         * background computation is passed to this step as a parameter.
+         * @param result The result of the background computation.
+         */
         @Override
         protected void onPostExecute(String result) {
             try {
@@ -473,6 +510,13 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             }
         }
 
+        /**
+         *  invoked on the UI thread after a call to publishProgress(Progress...). The timing of the
+         *  execution is undefined. This method is used to display any form of progress in the user
+         *  interface while the background computation is still executing. For instance, it can be
+         *  used to animate a progress bar or show logs in a text field.
+         * @param values
+         */
         @Override
         protected void onProgressUpdate(Void... values) {
 

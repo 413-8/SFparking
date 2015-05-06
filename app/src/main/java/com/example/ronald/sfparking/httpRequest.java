@@ -13,11 +13,11 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-/*
-    makes an http request through the internet and reads the text on that page into a buffer.
-    parkLoc is the location object that will hold information from the XML file retrieved over the
-    internet from the URL.
-*/
+
+/**
+ *  makes an http request through the internet and reads the text on that page into a buffer.
+ *  implemented by extending the AsyncTask class, so that it can run asynchronously.
+ */
 public class httpRequest extends AsyncTask<String, Void, ParkLocation>{
 
     private Context context;
@@ -27,7 +27,9 @@ public class httpRequest extends AsyncTask<String, Void, ParkLocation>{
         this.context = context;
     }
 
-    // Check Internet connection
+    /**
+     * Checks Internet connection and prints a toast if unable to connect.
+     */
     private void checkInternetConnection(){
         ConnectivityManager check = (ConnectivityManager) this.context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -36,13 +38,13 @@ public class httpRequest extends AsyncTask<String, Void, ParkLocation>{
     }
 
 
-    /*
-     * the method accepts the URL to be used as its first parameter.
+    /**
+     * accepts the URL to be used as its first parameter.
      * doInBackground opens an internet connection, 
      * reads the text on the resulting page on the url to a buffer.
      * after reading a line, it appends it to the String webPage, 
-     * which will hold the text of the webpage
-     * @return the String of text that is the webpage.
+     * which will hold the text of the XML file received from loadXmlFromNetwork.
+     * @return the String of text from the XML file.
      */
     @Override
     protected ParkLocation doInBackground(String... urls) {

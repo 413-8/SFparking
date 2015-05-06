@@ -17,6 +17,12 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     private static MySQLiteHelper instanceDB;
     //constructor
 
+    /**
+     * getter for the instance of this class, to provide a singleton class to maintain a single
+     * database for the app.
+     * @param context current context of program
+     * @return the MySQLiteHelper object that manages the database.
+     */
     public static synchronized MySQLiteHelper getInstance(Context context)
     {
         if(instanceDB==null)
@@ -34,6 +40,12 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         database.execSQL(SqliteSchema.CREATE_TABLE);
     }
 
+    /**
+     * if the app is upgraded, the location history table in the database will be deleted and re-created.
+     * @param database
+     * @param oldVer
+     * @param newVer
+     */
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVer, int newVer){
         Log.d(MySQLiteHelper.class.getName(), "Upgrading database from version " + oldVer + " to " +
