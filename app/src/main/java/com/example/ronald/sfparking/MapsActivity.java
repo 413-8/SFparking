@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -78,6 +79,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     private Geocoder geocoder;
     private List<Address> addressesFromGeocoder;
     private TextView addressAtCenterPin;
+    private Button saveButton;
 
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -90,6 +92,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         sliding_layout_container = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout_container);
         sliding_up_layout = (LinearLayout) findViewById(R.id.sliding_up_layout);
         park_data_text_view = (TextView) findViewById(R.id.park_data_text_view);
+        saveButton = (Button) findViewById(R.id.save_button);
         // hover_layout = (LinearLayout) findViewById(id.hoverPin); // not needed unless we want to hide it sometimes
 
         dataSource = new Park_LocationDataSource(this);
@@ -245,6 +248,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                             park_data_text_view.setText("\tNo Data");
                             // Set up panel when pin is dropped with No data
                             setUpPanelWithoutData();
+
                         } else {
                             onOffSt = parkLoc.getOnOffStreet();
                             rates = parkLoc.getRates();
@@ -303,6 +307,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         //if(sliding_up_layout.getVisibility() == LinearLayout.GONE)
         //  sliding_up_layout.setVisibility(LinearLayout.VISIBLE);
 
+        saveButton.setEnabled(true);
         sliding_layout_container.setPanelHeight(300);
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         sliding_layout_container.setTouchEnabled(true);
@@ -310,6 +315,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     /** Sets up panel to show information where pin is dropped + Save Pin and Remove Pin buttons */
     public void setUpPanelWithoutData() {
+        saveButton.setEnabled(false);
         sliding_layout_container.setPanelHeight(100);
         sliding_layout_container.setTouchEnabled(true);
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
