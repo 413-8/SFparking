@@ -58,7 +58,7 @@ public class Park_LocationDataSource {
                     null
             );
             if(cursor.getCount()>4) {
-                updateLocationInfoRow(locationinfo);
+                database.update(SqlEntry.TABLE_NAME, values, SqlEntry.COLUMN_ID + " = " + oldestID, null);
                 oldestID=(oldestID+1)%5;
             }else{
                 long insertId = database.insert(SqlEntry.TABLE_NAME, null, values);
@@ -69,27 +69,19 @@ public class Park_LocationDataSource {
 
 
     /**
-     * Updates a row of the SQLite table with a new LocationInfo object
+     * Updates a specified row of the SQLite table with a new LocationInfo object.
+     * use database.update if you want to update by using the id to find the value to replace.
      * @param newLoc The new LocationInfo object to update the row.
      */
-    public void updateLocationInfoRow( LocationInfo newLoc){
+    public void updateLocationInfoRow( LocationInfo newLoc, int row){
         //UPDATE TABLE_NAME SET longitude=newLoc.longitude WHERE id=
-        database.rawQuery("UPDATE " +SqlEntry.TABLE_NAME + " SET " +SqlEntry.COLUMN_LONGITUDE + "="
-                + newLoc.getLongitude()+" WHERE " + SqlEntry.COLUMN_ID + "="
-                + oldestID,null);
-        database.rawQuery("UPDATE " +SqlEntry.TABLE_NAME + " SET " + SqlEntry.COLUMN_LATITUDE + "="
-                + newLoc.getLatitude()+" WHERE " + SqlEntry.COLUMN_ID + "="
-                + oldestID,null);
-        database.rawQuery("UPDATE " +SqlEntry.TABLE_NAME + " SET " + SqlEntry.COLUMN_STREET + "='"
-                + newLoc.getStreetname()+"' WHERE " + SqlEntry.COLUMN_ID + "="
-                + oldestID,null);
-        database.rawQuery("UPDATE " +SqlEntry.TABLE_NAME + " SET " + SqlEntry.COLUMN_ON_OFF + "='"
-                + newLoc.getOn_off_street()+"' WHERE " + SqlEntry.COLUMN_ID + "="
-                + oldestID,null);
-        database.rawQuery("UPDATE " +SqlEntry.TABLE_NAME + " SET " + SqlEntry.COLUMN_TIME + "='"
-                + newLoc.getTime()+"' WHERE " + SqlEntry.COLUMN_ID + "="
-                + oldestID,null);
-
+        ContentValues values = new ContentValues();
+        values.put(SqlEntry.COLUMN_LONGITUDE, newLoc.getLongitude());
+        values.put(SqlEntry.COLUMN_LATITUDE, newLoc.getLatitude());
+        values.put(SqlEntry.COLUMN_STREET, newLoc.getStreetname());
+        values.put(SqlEntry.COLUMN_ON_OFF, newLoc.getOn_off_street());
+        values.put(SqlEntry.COLUMN_TIME, newLoc.getTime());
+        database.update(SqlEntry.TABLE_NAME, values, SqlEntry.COLUMN_ID + " = " + row, null);
     }
 
     /**
