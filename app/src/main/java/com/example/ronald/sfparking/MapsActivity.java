@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -380,7 +381,11 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             locationInfo.setStreet_name(parkLoc.getStreetName());
             locationInfo.setTime(str);
             dataSource.createLocationInfo(locationInfo);
-
+            Context context = getApplicationContext();
+            CharSequence message = "Location Saved \uD83D\uDC4D";
+            Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER,0,0);
+            toast.show();
 
         } else {
             Context context = getApplicationContext();
