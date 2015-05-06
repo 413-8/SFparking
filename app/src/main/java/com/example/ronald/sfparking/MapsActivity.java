@@ -1,6 +1,8 @@
 package com.example.ronald.sfparking;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -327,12 +329,15 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     public void parkButton(View view) {
         mGoogleMap.clear();
         if (latlngAtCameraCenter != null) {
+            Calendar calendar = Calendar.getInstance();
+            Date d = calendar.getTime();
+            String str = d.toString();
             LocationInfo locationInfo = new LocationInfo();
             locationInfo.setLatitude(latlngAtCameraCenter.latitude);
             locationInfo.setLongitude(latlngAtCameraCenter.longitude);
             locationInfo.setOn_off_street("On");
-            locationInfo.setStreet_name("Garfield");
-            locationInfo.setTime("8:00");
+            locationInfo.setStreet_name(parkLoc.getStreetName());
+            locationInfo.setTime(str);
             dataSource.createLocationInfo(locationInfo);
 
 
@@ -357,12 +362,15 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         //Location c = m;    // m is a data field in the MapsActivity class
 
         if (latlngAtCameraCenter != null) {
+            Calendar calendar = Calendar.getInstance();
+            Date d = calendar.getTime();
+            String str = d.toString();
             LocationInfo locationInfo = new LocationInfo();
             locationInfo.setLatitude(latlngAtCameraCenter.latitude);
             locationInfo.setLongitude(latlngAtCameraCenter.longitude);
             locationInfo.setOn_off_street(parkLoc.getOnOffStreet());
             locationInfo.setStreet_name(parkLoc.getStreetName());
-            locationInfo.setTime("12:00");
+            locationInfo.setTime(str);
             dataSource.createLocationInfo(locationInfo);
 
 

@@ -15,7 +15,7 @@ import java.util.Stack;
 import static com.example.ronald.sfparking.SqliteSchema.*;
 
 /**
- * Created by KingRat on 4/26/2015.
+ * Created by Dylan on 4/26/2015.
  * Interacts with the database on the device. All CRUD methods are defined here for tables in the
  * database.
  */

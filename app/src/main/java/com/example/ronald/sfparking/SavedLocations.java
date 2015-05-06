@@ -57,7 +57,7 @@ public class SavedLocations extends ActionBarActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String[] row = {"Location 1", "Location 2", "Location 3", "Location 4", "Location 5"};
+        String[] row = {"Location 1", "Location 2", "Location 3", "Location 4", "Location 5", "Location 6", "Location 7", "Location 8", "Location 9", "Location 10"};
         String[] column = {"Longitude", "Latitude", "Street Name"};
         int rl = row.length;
         int cl = column.length;
@@ -118,8 +118,8 @@ public class SavedLocations extends ActionBarActivity {
         LocationInfo currentLocation;
 
 
-        //single column table
-        for (int i = 0; i < 5; i++) {
+
+        for (int i = 0; i < 10; i++) {
 
             if (locations.isEmpty()) {
                 break;
@@ -127,42 +127,31 @@ public class SavedLocations extends ActionBarActivity {
                 currentLocation = locations.pop();
             }
 
-            for (int j = 0; j <= 6; j++) {
+            for (int j = 0; j <= 4; j++) {
 
                 TableRow tableRow = new TableRow(this);
                 tableRow.setBackgroundColor(Color.BLACK);
                 TextView textView = new TextView(this);
-                textView.setPadding(5, 5, 5, 5);
+                textView.setPadding(1, 1, 1, 1);
                 textView.setBackgroundColor(Color.WHITE);
                 textView.setGravity(Gravity.CENTER);
                 tableRowParams.setMargins(0, 0, 0, 0); //for columns 1-j
 
                 switch (j) {
+
                     case 0:
-                        tableRowParams.setMargins(0, 5, 0, 0);
-                        textView.setText("ID: " + currentLocation.getId());
-                        System.out.println("case 0");
+                        textView.setText("Accessed on: " + currentLocation.getTime());
+                        System.out.println("case 1");
                         break;
                     case 1:
                         textView.setText(currentLocation.getStreetname());
-                        System.out.println("case 1");
+                        System.out.println("case 2");
                         break;
                     case 2:
                         textView.setText("" + currentLocation.getOn_off_street() + "-street Parking");
-                        System.out.println("case 2");
-                        break;
-                    case 3:
-                        textView.setText(currentLocation.getTime());
                         System.out.println("case 3");
                         break;
-                    case 4:
-                        textView.setText("Lat: " + currentLocation.getLatitude());
-                        System.out.println("case 4");
-                        break;
-                    case 5:
-                        textView.setText("Long: " + currentLocation.getLongitude());
-                        System.out.println("case 5");
-                        break;
+
                 }
 
                 tableRow.addView(textView, tableRowParams);
