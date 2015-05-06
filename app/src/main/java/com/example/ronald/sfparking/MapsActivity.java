@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -34,8 +35,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -57,7 +56,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     // %%%%%%%%%%%%%%%%%%%%%%    DATA FIELDS    %%%%%%%%%%%%%%%%%%%%%%
     // A request to connect to Location Services
     private LocationRequest mLocationRequest;
-    GoogleMap mGoogleMap;
+    //  GoogleMap mGoogleMap;
+    GoogleMap map;
+    CustomMapFragment customMapFragment;
+
 
     private SlidingUpPanelLayout sliding_layout_container;
     private LinearLayout sliding_up_layout;
@@ -90,7 +92,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-
+        customMapFragment = ((CustomMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
         sliding_layout_container = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout_container);
         sliding_up_layout = (LinearLayout) findViewById(R.id.sliding_up_layout);
         park_data_text_view = (TextView) findViewById(R.id.park_data_text_view);
@@ -163,7 +165,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     }
 
     /**
-     *
      * @return the GoogleApiClient object built for the app.
      */
     protected GoogleApiClient getLocationApiClient() {
@@ -184,11 +185,26 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                     mGoogleApiClient);
 
             LatLng latLong;
-            mGoogleMap = ((MapFragment) getFragmentManager().findFragmentById(
-                    R.id.map)).getMap();
+
+
+            map = customMapFragment.getMap();
+
+            customMapFragment.setOnDragListener(new MapWrapperLayout.OnDragListener() {
+                @Override
+                public void onDrag(MotionEvent motionEvent) {
+                    //Log.d("ON_DRAG", String.format("ME: %s", motionEvent));
+                    // On ACTION_UP, proceed to request and display SFPark data
+                    if (motionEvent.getAction() == 1) {
+                        queryAndDisplaySfparkData();
+                    }
+                }
+            });
+
+            //mGoogleMap = ((MapFragment) getFragmentManager().findFragmentById(
+            //        R.id.map)).getMap();
 
             // Enabling MyLocation in Google Map
-            mGoogleMap.setMyLocationEnabled(true);
+            map.setMyLocationEnabled(true);
             if (mLastLocation != null) {
                 latLong = new LatLng(mLastLocation
                         .getLatitude(), mLastLocation
@@ -201,29 +217,19 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(latLong).zoom(15).build();
 
-            mGoogleMap.setMyLocationEnabled(true);
-            mGoogleMap.animateCamera(CameraUpdateFactory
+            map.setMyLocationEnabled(true);
+            map.animateCamera(CameraUpdateFactory
                     .newCameraPosition(cameraPosition));
             // Clears all the existing markers
             //mGoogleMap.clear();
 
 
-            mGoogleMap.setOnCameraChangeListener(new OnCameraChangeListener() {
-                private int CAMERA_MOVE_REACT_THRESHOLD_MS = 500;
-                private long lastCallMs = Long.MIN_VALUE;
-
+            map.setOnCameraChangeListener(new OnCameraChangeListener() {
                 @Override
                 public void onCameraChange(CameraPosition arg0) {
-                    final long snap = System.currentTimeMillis();
-                    if (lastCallMs + CAMERA_MOVE_REACT_THRESHOLD_MS > snap) {
-                        lastCallMs = snap;
-                        return;
-                    }
 
-                    latlngAtCameraCenter = mGoogleMap.getCameraPosition().target;
-
+                    latlngAtCameraCenter = map.getCameraPosition().target;
                     //  markerLayout.setVisibility(View.VISIBLE);
-                    park_data_text_view.setText("\tNo Data");
                     park_data_text_view.setVisibility(View.VISIBLE);
                     setUpPanelWithoutData();
 
@@ -232,45 +238,13 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                                 latlngAtCameraCenter.longitude)
                                 .execute();
 
-
                     } catch (Exception e) {
                     }
-                    makeURLString(Double.toString(latlngAtCameraCenter.latitude),
-                            Double.toString(latlngAtCameraCenter.longitude),
-                            radius);
-
 
                     // request and parse sfpark api
                     // display appropirate results to user
-                    try {
-                        parkLoc = new httpRequest(getApplicationContext()).execute(sfparkQueryUrl).get();
-                        streetName = parkLoc.getStreetName();
-
-                        if (streetName.equals("No Data")) {
-                            park_data_text_view.setText("\tNo Data");
-                            // Set up panel when pin is dropped with No data
-                            setUpPanelWithoutData();
-
-                        } else {
-                            onOffSt = parkLoc.getOnOffStreet();
-                            rates = parkLoc.getRates();
-                            park_data_text_view.setText("\tStreet Name: "
-                                    + streetName + "\n\tType: "
-                                    + onOffSt
-                                    + " street."
-                                    + "\n\tRates:\n"
-                                    + rates);
-                            // Set up panel when pin is dropped with data
-                            setUpPanelWithData();
-                        }
 
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-
-                    lastCallMs = snap;
                 }
             });
 
@@ -297,6 +271,36 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         }
     }
 
+    public void queryAndDisplaySfparkData() {
+        try {
+            makeURLString(Double.toString(latlngAtCameraCenter.latitude),
+                    Double.toString(latlngAtCameraCenter.longitude),
+                    radius);
+            parkLoc = new httpRequest(getApplicationContext()).execute(sfparkQueryUrl).get();
+            streetName = parkLoc.getStreetName();
+            if (streetName.equals("No Data")) {
+                park_data_text_view.setText("\tNo Data");
+                // Set up panel when pin is dropped with No data
+                setUpPanelWithoutData();
+            } else {
+                onOffSt = parkLoc.getOnOffStreet();
+                rates = parkLoc.getRates();
+                park_data_text_view.setText("\tStreet Name: "
+                        + streetName + "\n\tType: "
+                        + onOffSt
+                        + " street."
+                        + "\n\tRates:\n"
+                        + rates);
+                // Set up panel when pin is dropped with data
+                setUpPanelWithData();
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void setUpPanelDefault() {
 
         sliding_layout_container.setPanelHeight(150);
@@ -304,7 +308,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         sliding_layout_container.setTouchEnabled(false);
     }
 
-    /** Sets up panel to Park here and History buttons. */
+    /**
+     * Sets up panel to Park here and History buttons.
+     */
     public void setUpPanelWithData() {
         //if(sliding_up_layout.getVisibility() == LinearLayout.GONE)
         //  sliding_up_layout.setVisibility(LinearLayout.VISIBLE);
@@ -315,7 +321,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         sliding_layout_container.setTouchEnabled(true);
     }
 
-    /** Sets up panel to show information where pin is dropped + Save Pin and Remove Pin buttons */
+    /**
+     * Sets up panel to show information where pin is dropped + Save Pin and Remove Pin buttons
+     */
     public void setUpPanelWithoutData() {
         saveButton.setEnabled(false);
         sliding_layout_container.setPanelHeight(100);
@@ -327,7 +335,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     // %%%%%%%%%%%%%%%%%%%%%%  BUTTON HANDLERS  %%%%%%%%%%%%%%%%%%%%%%
     ////////// Parked Button
     public void parkButton(View view) {
-        mGoogleMap.clear();
+        map.clear();
         if (latlngAtCameraCenter != null) {
             Calendar calendar = Calendar.getInstance();
             Date d = calendar.getTime();
@@ -341,7 +349,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             dataSource.createLocationInfo(locationInfo);
 
 
-            mGoogleMap.addMarker(new MarkerOptions()
+            map.addMarker(new MarkerOptions()
                             .position(latlngAtCameraCenter)
                             .title("I parked here")
                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
@@ -478,6 +486,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
          * computation must be returned by this step and will be passed back to the last step. This
          * step can also use publishProgress(Progress...) to publish one or more units of progress.
          * These values are published on the UI thread, in the onProgressUpdate(Progress...) step.
+         *
          * @param params the parameters of the asynchronous task.
          * @return null for now.
          */
@@ -512,6 +521,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         /**
          * invoked on the UI thread after the background computation finishes. The result of the
          * background computation is passed to this step as a parameter.
+         *
          * @param result The result of the background computation.
          */
         @Override
@@ -525,10 +535,11 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         }
 
         /**
-         *  invoked on the UI thread after a call to publishProgress(Progress...). The timing of the
-         *  execution is undefined. This method is used to display any form of progress in the user
-         *  interface while the background computation is still executing. For instance, it can be
-         *  used to animate a progress bar or show logs in a text field.
+         * invoked on the UI thread after a call to publishProgress(Progress...). The timing of the
+         * execution is undefined. This method is used to display any form of progress in the user
+         * interface while the background computation is still executing. For instance, it can be
+         * used to animate a progress bar or show logs in a text field.
+         *
          * @param values
          */
         @Override
