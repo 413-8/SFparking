@@ -38,7 +38,7 @@ public class Park_LocationDataSource {
 
     /**
      * takes information from a LocationInfo object and stores it as a new row in the table.
-     * maximum number of stored entries:15
+     * maximum number of stored entries:5
      * @param locationinfo the LocationInfo object to be added to the table in a new row.
      */
         public void createLocationInfo(LocationInfo locationinfo){
@@ -57,9 +57,9 @@ public class Park_LocationDataSource {
                     null,
                     null
             );
-            if(cursor.getCount()>14) {
+            if(cursor.getCount()>4) {
                 updateLocationInfoRow(locationinfo);
-                oldestID=(oldestID+1)%15;
+                oldestID=(oldestID+1)%5;
             }else{
                 long insertId = database.insert(SqlEntry.TABLE_NAME, null, values);
             }
