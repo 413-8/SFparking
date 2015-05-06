@@ -53,12 +53,15 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     private SlidingUpPanelLayout sliding_layout_container;
     private LinearLayout sliding_up_layout;
-    private LinearLayout hover_layout;
+    //  private LinearLayout hover_layout; //not needed unless we want to hide it sometimes
     private Park_LocationDataSource dataSource;
     private ParkLocation parkLoc;
     private TextView park_data_text_view;
     private String sfparkQueryUrl;
     String radius = "0.007"; // approx. 37ft for accuracy
+    String streetName = "";
+    String onOffSt = "";
+    String rates = "";
 
     // Stores the current instantiation of the location client in this object
     private FusedLocationProviderApi mLocationClient;
@@ -82,7 +85,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         sliding_layout_container = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout_container);
         sliding_up_layout = (LinearLayout) findViewById(R.id.sliding_up_layout);
         park_data_text_view = (TextView) findViewById(R.id.park_data_text_view);
-        hover_layout = (LinearLayout) findViewById(id.hoverPin);
+        // hover_layout = (LinearLayout) findViewById(id.hoverPin); // not needed unless we want to hide it sometimes
 
         dataSource = new Park_LocationDataSource(this);
         dataSource.write();
@@ -216,38 +219,37 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                     makeURLString(Double.toString(latlngAtCameraCenter.latitude),
                             Double.toString(latlngAtCameraCenter.longitude),
                             radius);
-                    String streetName = "";
-                    String onOffSt = "";
-                    String rates = "";
 
-                    /* request and parse sfpark api */
-                    try{
+
+                    // request and parse sfpark api
+                    // display appropirate results to user
+                    try {
                         parkLoc = new httpRequest(getApplicationContext()).execute(sfparkQueryUrl).get();
                         streetName = parkLoc.getStreetName();
-                        onOffSt = parkLoc.getOnOffStreet();
-                        rates = parkLoc.getRates();
-                    } catch (Exception e){e.printStackTrace();}
 
-                    // add marker to the map: green if info available, red otherwise
-                    if (streetName.equals("No Data")) {
+                        if (streetName.equals("No Data")) {
+                            park_data_text_view.setText("\tNo Data");
+                            // Set up panel when pin is dropped with No data
+                            setUpPanelWithoutData();
+                        } else {
+                            onOffSt = parkLoc.getOnOffStreet();
+                            rates = parkLoc.getRates();
+                            park_data_text_view.setText("\tStreet Name: "
+                                    + streetName + "\n\tType: "
+                                    + onOffSt
+                                    + " street."
+                                    + "\n\tRates:\n"
+                                    + rates);
+                            // Set up panel when pin is dropped with data
+                            setUpPanelWithData();
+                        }
 
-                        park_data_text_view.setText("\tNo Data");
 
-                        // Set up panel when pin is dropped with No data
-                        setUpPanelWithoutData();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    else {
-                        park_data_text_view.setText("\tStreet Name: "
-                                + streetName + "\n\tType: "
-                                + onOffSt
-                                + " street."
-                                + "\n\tRates:\n"
-                                + rates);
 
 
-                        // Set up panel when pin is dropped with data
-                        setUpPanelWithData();
-                    }
                     lastCallMs = snap;
                 }
             });
@@ -331,10 +333,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     }
 
     ////////// Save Button
-    public void saveButton (View view){
+    public void saveButton(View view) {
         //Location c = m;    // m is a data field in the MapsActivity class
 
-        if(latlngAtCameraCenter != null) {
+        if (latlngAtCameraCenter != null) {
             LocationInfo locationInfo = new LocationInfo();
             locationInfo.setLatitude(latlngAtCameraCenter.latitude);
             locationInfo.setLongitude(latlngAtCameraCenter.longitude);
@@ -344,7 +346,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             dataSource.createLocationInfo(locationInfo);
 
 
-        } else{
+        } else {
             Context context = getApplicationContext();
             CharSequence text = "Location Not Available";
             int duration = Toast.LENGTH_SHORT;
