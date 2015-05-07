@@ -69,7 +69,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:ellipsize="end"
-                android:singleLine="true"
+                android:singleLine="false"
                 android:text="Getting location"
                 android:textSize="16sp" />
         </LinearLayout>
