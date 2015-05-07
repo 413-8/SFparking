@@ -84,7 +84,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     private Geocoder geocoder;
     private List<Address> addressesFromGeocoder;
     private TextView addressAtCenterPin;
+    private Button parkButton;
     private Button saveButton;
+    private Button historyButton;
 
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -97,14 +99,15 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         sliding_layout_container = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout_container);
         sliding_up_layout = (LinearLayout) findViewById(R.id.sliding_up_layout);
         park_data_text_view = (TextView) findViewById(R.id.park_data_text_view);
+        parkButton = (Button) findViewById(id.park_button);
         saveButton = (Button) findViewById(R.id.save_button);
+        historyButton = (Button) findViewById(id.history_button);
         // hover_layout = (LinearLayout) findViewById(id.hoverPin); // not needed unless we want to hide it sometimes
 
         dataSource = new Park_LocationDataSource(this);
         dataSource.write();
         dataSource.read();
 
-        setUpPanelDefault();
         //markerText = (TextView) findViewById(R.id.locationMarkertext);
         addressAtCenterPin = (TextView) findViewById(id.addressText);
         //    markerLayout = (LinearLayout) findViewById(R.id.locationMarker);
@@ -222,10 +225,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                     // On ACTION_DOWN, switch to default sliding_layout_container
                     // On ACTION_UP, proceed to request and display SFPark data
                     switch (motionEvent.getAction()) {
-                        // case 0: //ACTION_DOWN
+                        case 0: //ACTION_DOWN
                         //     setUpPanelDefault();
                         //     park_data_text_view.setVisibility(View.GONE);
-
+                            addressAtCenterPin.setText(" Getting location ");
                         case 1: //ACTION_UP
                             queryAndDisplayGoogleData();
                             queryAndDisplaySfparkData();
@@ -321,7 +324,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
      * Sets up sliding_layout_container for a default view
      */
     public void setUpPanelDefault() {
-
+        parkButton.setEnabled(false);
+        saveButton.setEnabled(false);
         park_data_text_view.setVisibility(View.GONE);
         sliding_layout_container.setPanelHeight(110);
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
@@ -334,7 +338,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     public void setUpPanelWithData() {
         //if(sliding_up_layout.getVisibility() == LinearLayout.GONE)
         //  sliding_up_layout.setVisibility(LinearLayout.VISIBLE);
-
+        parkButton.setEnabled(true);
         saveButton.setEnabled(true);
         sliding_layout_container.setPanelHeight(300);
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
@@ -345,6 +349,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
      * Sets up sliding_layout_container for a location that contains data from SFPark
      */
     public void setUpPanelWithoutData() {
+        parkButton.setEnabled(true);
         saveButton.setEnabled(false);
         sliding_layout_container.setPanelHeight(190);
         sliding_layout_container.setTouchEnabled(true);
@@ -552,7 +557,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         protected void onPostExecute(String result) {
             try {
                 addressAtCenterPin.setText(addressesFromGeocoder.get(0).getAddressLine(0)
-                        + addressesFromGeocoder.get(0).getAddressLine(1) + " ");
+                        + "\n" + addressesFromGeocoder.get(0).getAddressLine(1) + " ");
             } catch (Exception e) {
                 e.printStackTrace();
             }
