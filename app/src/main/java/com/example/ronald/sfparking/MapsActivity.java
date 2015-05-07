@@ -228,7 +228,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                         case 0: //ACTION_DOWN
                         //     setUpPanelDefault();
                         //     park_data_text_view.setVisibility(View.GONE);
-                            addressAtCenterPin.setText(" Getting location ");
+                        //    addressAtCenterPin.setText(" Getting location ");
                         case 1: //ACTION_UP
                             queryAndDisplayGoogleData();
                             queryAndDisplaySfparkData();
@@ -369,7 +369,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             locationInfo.setLatitude(latlngAtCameraCenter.latitude);
             locationInfo.setLongitude(latlngAtCameraCenter.longitude);
             locationInfo.setOn_off_street("On");
-            locationInfo.setStreet_name(parkLoc.getStreetName());
+            locationInfo.setStreet_name("\uD83C\uDD7F  " + parkLoc.getStreetName());
             locationInfo.setTime(str);
             dataSource.createLocationInfo(locationInfo);
 
