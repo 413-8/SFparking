@@ -69,7 +69,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     private ParkLocation parkLoc;
     private TextView park_data_text_view;
     private String sfparkQueryUrl;
-    String radius = "0.007"; // approx. 37ft for accuracy
+    String radius = "0.010"; // approx. 37ft for accuracy 0.007
     String streetName = "";
     String onOffSt = "";
     String rates = "";
@@ -190,16 +190,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
             map = customMapFragment.getMap();
 
-            customMapFragment.setOnDragListener(new MapWrapperLayout.OnDragListener() {
-                @Override
-                public void onDrag(MotionEvent motionEvent) {
-                    //Log.d("ON_DRAG", String.format("ME: %s", motionEvent));
-                    // On ACTION_UP, proceed to request and display SFPark data
-                    if (motionEvent.getAction() == 1) {
-                        queryAndDisplaySfparkData();
-                    }
-                }
-            });
 
             //mGoogleMap = ((MapFragment) getFragmentManager().findFragmentById(
             //        R.id.map)).getMap();
@@ -222,7 +212,27 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             map.animateCamera(CameraUpdateFactory
                     .newCameraPosition(cameraPosition));
             // Clears all the existing markers
-            //mGoogleMap.clear();
+            // mGoogleMap.clear();
+            // latlngAtCameraCenter = map.getCameraPosition().target;
+
+            customMapFragment.setOnDragListener(new MapWrapperLayout.OnDragListener() {
+                @Override
+                public void onDrag(MotionEvent motionEvent) {
+                    //Log.d("ON_DRAG", String.format("ME: %s", motionEvent));
+                    // On ACTION_DOWN, switch to default sliding_layout_container
+                    // On ACTION_UP, proceed to request and display SFPark data
+                    switch (motionEvent.getAction()) {
+                        // case 0: //ACTION_DOWN
+                        //     setUpPanelDefault();
+                        //     park_data_text_view.setVisibility(View.GONE);
+
+                        case 1: //ACTION_UP
+                            queryAndDisplayGoogleData();
+                            queryAndDisplaySfparkData();
+                            park_data_text_view.setVisibility(View.VISIBLE);
+                    }
+                }
+            });
 
 
             map.setOnCameraChangeListener(new OnCameraChangeListener() {
@@ -231,16 +241,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
                     latlngAtCameraCenter = map.getCameraPosition().target;
                     //  markerLayout.setVisibility(View.VISIBLE);
-                    park_data_text_view.setVisibility(View.VISIBLE);
-                    setUpPanelWithoutData();
 
-                    try {
-                        new GetLocationAsync(latlngAtCameraCenter.latitude,
-                                latlngAtCameraCenter.longitude)
-                                .execute();
-
-                    } catch (Exception e) {
-                    }
+                    //setUpPanelWithoutData();
 
                     // request and parse sfpark api
                     // display appropirate results to user
@@ -266,9 +268,22 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
                 }
             }); */
+            latlngAtCameraCenter = latLong;
+            queryAndDisplayGoogleData();
+            setUpPanelDefault();
 
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public void queryAndDisplayGoogleData() {
+        try {
+            new GetLocationAsync(latlngAtCameraCenter.latitude,
+                    latlngAtCameraCenter.longitude)
+                    .execute();
+
+        } catch (Exception e) {
         }
     }
 
@@ -302,15 +317,19 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         }
     }
 
+    /**
+     * Sets up sliding_layout_container for a default view
+     */
     public void setUpPanelDefault() {
 
-        sliding_layout_container.setPanelHeight(150);
+        park_data_text_view.setVisibility(View.GONE);
+        sliding_layout_container.setPanelHeight(110);
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         sliding_layout_container.setTouchEnabled(false);
     }
 
     /**
-     * Sets up panel to Park here and History buttons.
+     * Sets up sliding_layout_container for a location that has no data form SFPark
      */
     public void setUpPanelWithData() {
         //if(sliding_up_layout.getVisibility() == LinearLayout.GONE)
@@ -323,18 +342,18 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     }
 
     /**
-     * Sets up panel to show information where pin is dropped + Save Pin and Remove Pin buttons
+     * Sets up sliding_layout_container for a location that contains data from SFPark
      */
     public void setUpPanelWithoutData() {
         saveButton.setEnabled(false);
-        sliding_layout_container.setPanelHeight(100);
+        sliding_layout_container.setPanelHeight(190);
         sliding_layout_container.setTouchEnabled(true);
-        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // %%%%%%%%%%%%%%%%%%%%%%  BUTTON HANDLERS  %%%%%%%%%%%%%%%%%%%%%%
-    ////////// Parked Button
+    ////////// Park Button
     public void parkButton(View view) {
         map.clear();
         if (latlngAtCameraCenter != null) {
@@ -384,7 +403,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             Context context = getApplicationContext();
             CharSequence message = "Location Saved \uD83D\uDC4D";
             Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER,0,0);
+            toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
             toast.show();
 
         } else {
