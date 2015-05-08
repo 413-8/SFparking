@@ -74,7 +74,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     String onOffSt = "";
     String rates = "";
 
-    // Stores the current instantiation of the location client in this object
+     /**
+     * Stores the current instantiation of the location client in this object
+     */
     private FusedLocationProviderApi mLocationClient;
     public GoogleApiClient mGoogleApiClient;
     boolean mUpdatesRequested = false;
@@ -280,6 +282,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         }
     }
 
+    /**
+     * retrieves data about the center location asynchronously
+     */
     public void queryAndDisplayGoogleData() {
         try {
             new GetLocationAsync(latlngAtCameraCenter.latitude,
@@ -290,6 +295,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         }
     }
 
+    /**
+     * Sets up the information panel when a marker is placed on the map by sending a query to the
+     * SFPark server.
+     */
     public void queryAndDisplaySfparkData() {
         try {
             makeURLString(Double.toString(latlngAtCameraCenter.latitude),
@@ -358,7 +367,11 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // %%%%%%%%%%%%%%%%%%%%%%  BUTTON HANDLERS  %%%%%%%%%%%%%%%%%%%%%%
-    ////////// Park Button
+    /**
+     * Park Button.  creates a location object with the given latlngAtCameraCenter and stores it
+     * into an SQLite database on the device.  Also adds a new marker on the map after clearing any
+     * other markers placed.
+     */
     public void parkButton(View view) {
         map.clear();
         if (latlngAtCameraCenter != null) {
@@ -390,7 +403,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     }
 
-    ////////// Save Button
+    /**
+     * Save Button
+     * saves a location's data to the SQLite database on the device.
+     */
     public void saveButton(View view) {
         //Location c = m;    // m is a data field in the MapsActivity class
 
@@ -422,7 +438,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     }
 
-    ////////// History Button
+    /**
+     * History Button
+     * starts the history table activity .SavedLocations
+     */
     public void historyButton(View view) {
 
         startActivity(new Intent(".SavedLocations"));
@@ -515,6 +534,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
          * computation must be returned by this step and will be passed back to the last step. This
          * step can also use publishProgress(Progress...) to publish one or more units of progress.
          * These values are published on the UI thread, in the onProgressUpdate(Progress...) step.
+         * In this case, it is retrieving addresses from a Geocoder object and getting more detailed
+         * information about the location and returning it as a string..
          *
          * @param params the parameters of the asynchronous task.
          * @return null for now.

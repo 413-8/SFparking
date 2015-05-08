@@ -20,7 +20,7 @@ import static com.example.ronald.sfparking.SqliteSchema.*;
  * database.
  */
 public class Park_LocationDataSource {
-        private static int oldestID =0;
+        private static int oldestID =1;
         private SQLiteDatabase database;
         private MySQLiteHelper dbHelper;
         private String [] allColumns = getColumns();
@@ -59,9 +59,14 @@ public class Park_LocationDataSource {
             );
             if(cursor.getCount()>4) {
                 database.update(SqlEntry.TABLE_NAME, values, SqlEntry.COLUMN_ID + " = " + oldestID, null);
-                oldestID=(oldestID+1)%5;
+                oldestID=(oldestID+1)%6;
+                System.out.print(oldestID);
+                if(oldestID==0)
+                    oldestID =1;
+                cursor.close();
             }else{
                 long insertId = database.insert(SqlEntry.TABLE_NAME, null, values);
+                cursor.close();
             }
 
 
@@ -143,7 +148,7 @@ public class Park_LocationDataSource {
             if (cursor.isNull(0)) {
                return locations;
             }
-            if(oldestID==0)
+            if(oldestID==1)
             {
                 while(!cursor.isAfterLast())
                 {
@@ -154,7 +159,7 @@ public class Park_LocationDataSource {
                 cursor.close();
                 return locations;
             }
-            cursor.move(oldestID);
+            cursor.move((oldestID-1));
             location = cursorToLocationInfo(cursor);
             locations.push(location);
             cursor.moveToNext();
