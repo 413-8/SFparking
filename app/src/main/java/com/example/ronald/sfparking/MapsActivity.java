@@ -55,7 +55,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // %%%%%%%%%%%%%%%%%%%%%%    DATA FIELDS    %%%%%%%%%%%%%%%%%%%%%%
-    // A request to connect to Location Services
+    /**
+     * A request to connect to Location Services
+     */
     private LocationRequest mLocationRequest;
     //  GoogleMap mGoogleMap;
     GoogleMap map;
@@ -81,6 +83,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     public GoogleApiClient mGoogleApiClient;
     boolean mUpdatesRequested = false;
     private TextView markerText;
+    /**
+     * the LatLng object that keeps the latitude and longitude of the view center.
+     */
     private LatLng latlngAtCameraCenter;
     //  private LinearLayout markerLayout;
     private Geocoder geocoder;
@@ -89,7 +94,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     private Button parkButton;
     private Button saveButton;
     private Button historyButton;
-
+    private Button zoomButton;
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // %%%%%%%%%%%%%%%%%%%%%%      ONCREATE     %%%%%%%%%%%%%%%%%%%%%%
@@ -335,6 +340,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     public void setUpPanelDefault() {
         parkButton.setEnabled(false);
         saveButton.setEnabled(false);
+
         park_data_text_view.setVisibility(View.GONE);
         sliding_layout_container.setPanelHeight(110);
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
@@ -447,10 +453,26 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         startActivity(new Intent(".SavedLocations"));
     }
 
+    public void zoomButton(View view) {
+        float zoom = map.getCameraPosition().zoom;
+        if(zoom==20.0f)
+        {
+            map.animateCamera(CameraUpdateFactory.zoomTo( 15.0f ));
+        }else
+            map.animateCamera(CameraUpdateFactory.zoomTo( 20.0f ));
+    }
+
+    /**
+     * gives sfparkQueryUrl a query string from URLMaker using the given params
+     * @param latitude the latitude to inclde in the string
+     * @param longitude the longitude to include in the string
+     * @param radius the radius to include in the string.
+     */
     private void makeURLString(String latitude, String longitude, String radius) {
         URLMaker temp = URLMaker.getInstance();
         sfparkQueryUrl = temp.makeURL(latitude, longitude, radius);
     }
+
 
 
     //empty inherited methods
@@ -512,7 +534,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         double x, y;
         StringBuilder str;
 
-
+        //constructor
         public GetLocationAsync(double latitude, double longitude) {
             x = latitude;
             y = longitude;

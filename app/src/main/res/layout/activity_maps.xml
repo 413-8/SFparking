@@ -77,6 +77,28 @@
                 android:textSize="16sp" />
         </LinearLayout>
 
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:layout_marginLeft="310dp"
+            android:layout_marginRight="13dp"
+            android:background="@android:color/holo_green_dark"
+            android:orientation="vertical"
+            >
+
+            <Button style="@android:style/TextAppearance"
+                android:id="@+id/zoom_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Zoom"
+                android:textSize="9sp"
+                android:onClick="zoomButton"/>
+
+
+        </LinearLayout>
         <!--DEPRECATED The cyan floating marker that follows camera center
         <LinearLayout
             android:id="@+id/locationMarker"

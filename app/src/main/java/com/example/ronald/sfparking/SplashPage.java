@@ -14,7 +14,7 @@ import android.widget.Toast;
 /**
  * Created by saralove on 4/22/2015.
  * splash page for the application.
- * shows splash for brief period while background tasks are started, then starts app
+ * shows splash for a brief period while background tasks are started, then starts app
  */
 public class SplashPage extends Activity {
 
@@ -79,7 +79,9 @@ public class SplashPage extends Activity {
             //progressDialog.show();
         }
 
-        //Loads the database and map then starts up the app
+        /**
+         * Loads the database and map, then starts up the app
+         */
         @Override
         protected Void doInBackground(Void... params){
             try {
@@ -98,14 +100,18 @@ public class SplashPage extends Activity {
             return null;
         }
 
-        //Updates the progressDialog
+        /**
+         * Updates the progressDialog
+         */
         @Override
         protected void onProgressUpdate(Integer... values){
             progressDialog.setProgress(values[0]);
             setContentView(R.layout.activity_splash);
         }
 
-        //Dismisses the progress Dialog
+        /**
+         * Dismisses the progress Dialog
+         */
         @Override
         protected void onPostExecute(Void result){
             progressDialog.dismiss();

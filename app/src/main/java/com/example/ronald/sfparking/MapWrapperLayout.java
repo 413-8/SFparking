@@ -16,6 +16,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 
 /**
  * MapWrapperLayout handles drag events form the user onto the map
+ * extends FrameLayout
  */
 public class MapWrapperLayout extends FrameLayout {
 
