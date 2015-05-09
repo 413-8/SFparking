@@ -60,23 +60,19 @@ public class SplashPage extends Activity {
         alert.show();
     }
 
-    /*Background loading*/
+    /**
+     * Background Loading
+     */
     private class LoadViewTask extends AsyncTask<Void, Integer, Void> {
 
-        //Execute before the background starts loading
+        /**
+         *Execute before the background starts loading
+         */
         @Override
         protected void onPreExecute(){
 
             setContentView(R.layout.activity_splash);
-            progressDialog = new ProgressDialog(SplashPage.this);
-            //progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            //progressDialog.setTitle("Loading...");
-            progressDialog.setMessage("Loading, please wait...");
-            progressDialog.setCancelable(false);
-            progressDialog.setIndeterminate(false);
-            progressDialog.setMax(100);
-            progressDialog.setProgress(0);
-            //progressDialog.show();
+            super.onPreExecute();
         }
 
         /**
@@ -86,10 +82,7 @@ public class SplashPage extends Activity {
         protected Void doInBackground(Void... params){
             try {
                 synchronized (this){
-                    //for (int counter = 0; counter <=1; counter++) {
-                        wait(2000);
-                      //  publishProgress(counter * 25);
-                    //}
+                        wait(1500);
                 }
             } catch (Exception e){
                 e.printStackTrace();
@@ -100,23 +93,6 @@ public class SplashPage extends Activity {
             return null;
         }
 
-        /**
-         * Updates the progressDialog
-         */
-        @Override
-        protected void onProgressUpdate(Integer... values){
-            progressDialog.setProgress(values[0]);
-            setContentView(R.layout.activity_splash);
-        }
-
-        /**
-         * Dismisses the progress Dialog
-         */
-        @Override
-        protected void onPostExecute(Void result){
-            progressDialog.dismiss();
-            setContentView(R.layout.activity_splash);
-        }
     }
 
     protected void onPause(){
