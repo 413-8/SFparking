@@ -95,6 +95,9 @@ public class SplashPage extends Activity {
 
     }
 
+    /**
+     * Pauses on the splash screen temporarily then move onto the map.
+     */
     protected void onPause(){
         super.onPause();
         finish();
