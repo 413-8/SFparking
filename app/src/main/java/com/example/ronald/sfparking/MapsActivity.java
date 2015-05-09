@@ -35,7 +35,6 @@ import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -67,7 +66,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     private SlidingUpPanelLayout sliding_layout_container;
     private LinearLayout sliding_up_layout;
     //  private LinearLayout hover_layout; //not needed unless we want to hide it sometimes
-    private Park_LocationDataSource dataSource;
+    private Park_LocationDataSource databaseAccessor;
     private ParkLocation parkLoc;
     private TextView park_data_text_view;
     private String sfparkQueryUrl;
@@ -111,9 +110,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         historyButton = (Button) findViewById(id.history_button);
         // hover_layout = (LinearLayout) findViewById(id.hoverPin); // not needed unless we want to hide it sometimes
 
-        dataSource = new Park_LocationDataSource(this);
-        dataSource.write();
-        dataSource.read();
+        databaseAccessor = new Park_LocationDataSource(this);
+        databaseAccessor.write();
+        databaseAccessor.read();
 
         //markerText = (TextView) findViewById(R.id.locationMarkertext);
         addressAtCenterPin = (TextView) findViewById(id.addressText);
@@ -199,6 +198,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
 
             map = customMapFragment.getMap();
+            map.setIndoorEnabled(false);
 
 
             //mGoogleMap = ((MapFragment) getFragmentManager().findFragmentById(
@@ -233,10 +233,12 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                     // On ACTION_UP, proceed to request and display SFPark data
                     switch (motionEvent.getAction()) {
                         case 0: //ACTION_DOWN
-                        //     setUpPanelDefault();
-                        //     park_data_text_view.setVisibility(View.GONE);
-                        //    addressAtCenterPin.setText(" Getting location ");
+                            //     setUpPanelDefault();
+                            //     park_data_text_view.setVisibility(View.GONE);
+                            //    addressAtCenterPin.setText(" Getting location ");
                         case 1: //ACTION_UP
+                            latlngAtCameraCenter = map.getCameraPosition().target;
+
                             queryAndDisplayGoogleData();
                             queryAndDisplaySfparkData();
                             park_data_text_view.setVisibility(View.VISIBLE);
@@ -245,7 +247,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             });
 
 
-            map.setOnCameraChangeListener(new OnCameraChangeListener() {
+            /*map.setOnCameraChangeListener(new OnCameraChangeListener() {
                 @Override
                 public void onCameraChange(CameraPosition arg0) {
 
@@ -259,7 +261,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
 
                 }
-            });
+            });*/
 
           /*  markerLayout.setOnClickListener(new OnClickListener() {
 
@@ -390,7 +392,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             locationInfo.setOn_off_street("On");
             locationInfo.setStreet_name("\uD83C\uDD7F  " + parkLoc.getStreetName());
             locationInfo.setTime(str);
-            dataSource.createLocationInfo(locationInfo);
+            databaseAccessor.createLocationInfo(locationInfo);
 
 
             map.addMarker(new MarkerOptions()
@@ -426,7 +428,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             locationInfo.setOn_off_street(parkLoc.getOnOffStreet());
             locationInfo.setStreet_name(parkLoc.getStreetName());
             locationInfo.setTime(str);
-            dataSource.createLocationInfo(locationInfo);
+            databaseAccessor.createLocationInfo(locationInfo);
             Context context = getApplicationContext();
             CharSequence message = "Location Saved \uD83D\uDC4D";
             Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
