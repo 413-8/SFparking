@@ -1,7 +1,6 @@
-<com.sothree.slidinguppanel.SlidingUpPanelLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:sothree="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sliding_layout_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,18 +10,17 @@
 
     <!--main content-->
     <FrameLayout
+        android:id="@+id/map_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MapsActivity"
-        android:id="@+id/map_frame">
+        tools:context=".MapsActivity">
 
         <!--the actual map-->
         <fragment
             android:id="@+id/map"
             android:name="com.example.ronald.sfparking.CustomMapFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            android:layout_height="match_parent" />
 
         <!--a layer to hold an anchored pin-->
         <LinearLayout
@@ -39,21 +37,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/map_pin"
                 android:scaleX="0.08"
-                android:scaleY="0.08"/>
+                android:scaleY="0.08"
+                android:src="@drawable/map_pin" />
         </LinearLayout>
 
         <!--top bar with current address-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_marginRight="60dp"
-            android:layout_marginLeft="8dp"
             android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="60dp"
+            android:layout_marginTop="12dp"
             android:background="@android:color/white"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <!--"Selected Location" text in green-->
             <TextView
@@ -77,28 +75,16 @@
                 android:textSize="16sp" />
         </LinearLayout>
 
+        <ImageButton
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:layout_gravity="top|right"
+            android:layout_marginRight="12dp"
+            android:layout_marginTop="60dp"
+            android:background="#D0FFFFFF"
+            android:src="@android:drawable/ic_menu_zoom"
+            android:onClick="zoomButton"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
-            android:layout_marginLeft="310dp"
-            android:layout_marginRight="13dp"
-            android:background="@android:color/holo_green_dark"
-            android:orientation="vertical"
-            >
-
-            <Button style="@android:style/TextAppearance"
-                android:id="@+id/zoom_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Zoom"
-                android:textSize="9sp"
-                android:onClick="zoomButton"/>
-
-
-        </LinearLayout>
         <!--DEPRECATED The cyan floating marker that follows camera center
         <LinearLayout
             android:id="@+id/locationMarker"
@@ -122,24 +108,24 @@
                 android:textColor="@android:color/black" />
                 android:background="@drawable/rounded_corner_map" -->
 
-            <!--
-                        <ImageView
-                            android:id="@+id/imageView1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            />
-                           android:src="@drawable/add_marker" /> ->
-        </LinearLayout> -->
+        <!--
+                    <ImageView
+                        android:id="@+id/imageView1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        />
+                       android:src="@drawable/add_marker" /> ->
+    </LinearLayout> -->
 
 
     </FrameLayout>
 
     <!-- Sliding Layout -->
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:divider="?android:dividerVertical"
+        android:orientation="vertical"
         android:showDividers="beginning|middle|end">
 
         <!-- TextView to display No Data or Data -->
@@ -147,45 +133,48 @@
             android:id="@+id/park_data_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"
             android:layout_margin="10dp"
             android:gravity="left"
+            android:padding="10dp"
             android:textColor="#000000"
-            android:textSize="15sp"/>
+            android:textSize="15sp" />
 
         <!-- Default drawer with 3 buttons -->
-        <LinearLayout style="?android:buttonBarStyle"
+        <LinearLayout
             android:id="@+id/sliding_up_layout"
+            style="?android:buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:divider="?android:dividerHorizontal"
             android:showDividers="beginning|middle|end">
 
-            <Button style="?android:buttonBarButtonStyle"
+            <Button
                 android:id="@+id/park_button"
+                style="?android:buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Park"
-                android:onClick="parkButton"/>
-            <Button style="?android:buttonBarButtonStyle"
+                android:onClick="parkButton"
+                android:text="Park" />
+
+            <Button
                 android:id="@+id/save_button"
+                style="?android:buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Save"
-                android:onClick="saveButton"/>
-            <Button style="?android:buttonBarButtonStyle"
+                android:onClick="saveButton"
+                android:text="Save" />
+
+            <Button
                 android:id="@+id/history_button"
+                style="?android:buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="History"
-                android:onClick="historyButton"/>
+                android:onClick="historyButton"
+                android:text="History" />
         </LinearLayout>
-
-
-
 
 
     </LinearLayout>
