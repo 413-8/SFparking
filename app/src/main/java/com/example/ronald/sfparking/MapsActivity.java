@@ -23,7 +23,6 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,7 +30,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -54,46 +52,36 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // %%%%%%%%%%%%%%%%%%%%%%    DATA FIELDS    %%%%%%%%%%%%%%%%%%%%%%
+
+    // map handlers
+    private static GoogleMap theMap;
+    private static Park_LocationDataSource databaseAccessor;
     /**
-     * A request to connect to Location Services
+     * Stores the current instantiation of the location client in this object
      */
-    private LocationRequest mLocationRequest;
-    //  GoogleMap mGoogleMap;
-    GoogleMap map;
-    CustomMapFragment customMapFragment;
+    public GoogleApiClient mGoogleApiClient; //
+    boolean mUpdatesRequested = false;
+    /**
+     * the LatLng object that keeps the latitude and longitude of the view center.
+     */
+    private LatLng latLngAtCameraCenter;
+    private List<Address> addressesFromGeocoder;
 
-
-    private SlidingUpPanelLayout sliding_layout_container;
-    private LinearLayout sliding_up_layout;
-    //  private LinearLayout hover_layout; //not needed unless we want to hide it sometimes
-    private Park_LocationDataSource databaseAccessor;
     private ParkLocation parkLoc;
-    private TextView park_data_text_view;
     private String sfparkQueryUrl;
-    String radius = "0.010"; // approx. 37ft for accuracy 0.007
+    final String radius = "0.010"; // approx. 37ft for accuracy 0.007
     String streetName = "";
     String onOffSt = "";
     String rates = "";
 
-     /**
-     * Stores the current instantiation of the location client in this object
-     */
-    private FusedLocationProviderApi mLocationClient;
-    public GoogleApiClient mGoogleApiClient;
-    boolean mUpdatesRequested = false;
-    private TextView markerText;
-    /**
-     * the LatLng object that keeps the latitude and longitude of the view center.
-     */
-    private LatLng latlngAtCameraCenter;
-    //  private LinearLayout markerLayout;
-    private Geocoder geocoder;
-    private List<Address> addressesFromGeocoder;
-    private TextView addressAtCenterPin;
-    private Button parkButton;
-    private Button saveButton;
-    private Button historyButton;
-    private Button zoomButton;
+    // UI element reference variables
+    private static CustomMapFragment customMapFragment;
+    private static SlidingUpPanelLayout sliding_layout_container;
+    private static TextView park_data_text_view;
+    private static TextView addressAtCenterPin;
+ // private static LinearLayout hover_layout; //not needed unless we want to hide it sometimes
+    private static Button parkButton;
+    private static Button saveButton;
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // %%%%%%%%%%%%%%%%%%%%%%      ONCREATE     %%%%%%%%%%%%%%%%%%%%%%
@@ -103,18 +91,15 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         setContentView(R.layout.activity_maps);
         customMapFragment = ((CustomMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
         sliding_layout_container = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout_container);
-        sliding_up_layout = (LinearLayout) findViewById(R.id.sliding_up_layout);
         park_data_text_view = (TextView) findViewById(R.id.park_data_text_view);
         parkButton = (Button) findViewById(id.park_button);
         saveButton = (Button) findViewById(R.id.save_button);
-        historyButton = (Button) findViewById(id.history_button);
         // hover_layout = (LinearLayout) findViewById(id.hoverPin); // not needed unless we want to hide it sometimes
 
         databaseAccessor = new Park_LocationDataSource(this);
         databaseAccessor.write();
         databaseAccessor.read();
 
-        //markerText = (TextView) findViewById(R.id.locationMarkertext);
         addressAtCenterPin = (TextView) findViewById(id.addressText);
         //    markerLayout = (LinearLayout) findViewById(R.id.locationMarker);
         // Getting Google Play availability status
@@ -133,7 +118,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
             // Getting reference to the SupportMapFragment
             // Create a new global location parameters object
-            mLocationRequest = LocationRequest.create();
+            /*
+      A request to connect to Location Services
+     */
+            LocationRequest mLocationRequest = LocationRequest.create();
 
             /*
              * Set the update interval
@@ -177,13 +165,13 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     /**
      * @return the GoogleApiClient object built for the app.
      */
-    protected GoogleApiClient getLocationApiClient() {
+    /*protected GoogleApiClient getLocationApiClient() {
         return new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-    }
+    }*/
 
     /**
      * Creates the google map to be used as the initial view.
@@ -197,15 +185,15 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             LatLng latLong;
 
 
-            map = customMapFragment.getMap();
-            map.setIndoorEnabled(false);
+            theMap = customMapFragment.getMap();
+            theMap.setIndoorEnabled(false);
 
 
             //mGoogleMap = ((MapFragment) getFragmentManager().findFragmentById(
             //        R.id.map)).getMap();
 
             // Enabling MyLocation in Google Map
-            map.setMyLocationEnabled(true);
+            theMap.setMyLocationEnabled(true);
             if (mLastLocation != null) {
                 latLong = new LatLng(mLastLocation
                         .getLatitude(), mLastLocation
@@ -218,12 +206,12 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(latLong).zoom(15).build();
 
-            map.setMyLocationEnabled(true);
-            map.animateCamera(CameraUpdateFactory
+            theMap.setMyLocationEnabled(true);
+            theMap.animateCamera(CameraUpdateFactory
                     .newCameraPosition(cameraPosition));
             // Clears all the existing markers
             // mGoogleMap.clear();
-            // latlngAtCameraCenter = map.getCameraPosition().target;
+            // latLngAtCameraCenter = theMap.getCameraPosition().target;
 
             customMapFragment.setOnDragListener(new MapWrapperLayout.OnDragListener() {
                 @Override
@@ -237,7 +225,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                             //     park_data_text_view.setVisibility(View.GONE);
                             //    addressAtCenterPin.setText(" Getting location ");
                         case 1: //ACTION_UP
-                            latlngAtCameraCenter = map.getCameraPosition().target;
+                            latLngAtCameraCenter = theMap.getCameraPosition().target;
 
                             queryAndDisplayGoogleData();
                             queryAndDisplaySfparkData();
@@ -247,17 +235,17 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             });
 
 
-            /*map.setOnCameraChangeListener(new OnCameraChangeListener() {
+            /*theMap.setOnCameraChangeListener(new OnCameraChangeListener() {
                 @Override
                 public void onCameraChange(CameraPosition arg0) {
 
-                    latlngAtCameraCenter = map.getCameraPosition().target;
+                    latLngAtCameraCenter = theMap.getCameraPosition().target;
                     //  markerLayout.setVisibility(View.VISIBLE);
 
                     //setUpPanelWithoutData();
 
                     // request and parse sfpark api
-                    // display appropirate results to user
+                    // display appropriate results to user
 
 
                 }
@@ -270,8 +258,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
                     try {
 
-                        LatLng latLng1 = new LatLng(latlngAtCameraCenter.latitude,
-                                latlngAtCameraCenter.longitude);
+                        LatLng latLng1 = new LatLng(latLngAtCameraCenter.latitude,
+                                latLngAtCameraCenter.longitude);
 
 
                         markerLayout.setVisibility(View.GONE);
@@ -280,7 +268,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
                 }
             }); */
-            latlngAtCameraCenter = latLong;
+            latLngAtCameraCenter = latLong;
             queryAndDisplayGoogleData();
             setUpPanelDefault();
 
@@ -294,22 +282,23 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
      */
     public void queryAndDisplayGoogleData() {
         try {
-            new GetLocationAsync(latlngAtCameraCenter.latitude,
-                    latlngAtCameraCenter.longitude)
+            new GetLocationAsync(latLngAtCameraCenter.latitude,
+                    latLngAtCameraCenter.longitude)
                     .execute();
 
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     /**
-     * Sets up the information panel when a marker is placed on the map by sending a query to the
+     * Sets up the information panel when a marker is placed on theMap by sending a query to the
      * SFPark server.
      */
     public void queryAndDisplaySfparkData() {
         try {
-            makeURLString(Double.toString(latlngAtCameraCenter.latitude),
-                    Double.toString(latlngAtCameraCenter.longitude),
+            makeURLString(Double.toString(latLngAtCameraCenter.latitude),
+                    Double.toString(latLngAtCameraCenter.longitude),
                     radius);
             parkLoc = new httpRequest(getApplicationContext()).execute(sfparkQueryUrl).get();
             streetName = parkLoc.getStreetName();
@@ -342,7 +331,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     public void setUpPanelDefault() {
         parkButton.setEnabled(false);
         saveButton.setEnabled(false);
-
         park_data_text_view.setVisibility(View.GONE);
         sliding_layout_container.setPanelHeight(110);
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
@@ -353,8 +341,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
      * Sets up sliding_layout_container for a location that has no data form SFPark
      */
     public void setUpPanelWithData() {
-        //if(sliding_up_layout.getVisibility() == LinearLayout.GONE)
-        //  sliding_up_layout.setVisibility(LinearLayout.VISIBLE);
         parkButton.setEnabled(true);
         saveButton.setEnabled(true);
         sliding_layout_container.setPanelHeight(300);
@@ -376,27 +362,27 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // %%%%%%%%%%%%%%%%%%%%%%  BUTTON HANDLERS  %%%%%%%%%%%%%%%%%%%%%%
     /**
-     * Park Button.  creates a location object with the given latlngAtCameraCenter and stores it
-     * into an SQLite database on the device.  Also adds a new marker on the map after clearing any
+     * Park Button.  creates a location object with the given latLngAtCameraCenter and stores it
+     * into an SQLite database on the device.  Also adds a new marker on theMap after clearing any
      * other markers placed.
      */
     public void parkButton(View view) {
-        map.clear();
-        if (latlngAtCameraCenter != null) {
+        theMap.clear();
+        if (latLngAtCameraCenter != null) {
             Calendar calendar = Calendar.getInstance();
             Date d = calendar.getTime();
             String str = d.toString();
             LocationInfo locationInfo = new LocationInfo();
-            locationInfo.setLatitude(latlngAtCameraCenter.latitude);
-            locationInfo.setLongitude(latlngAtCameraCenter.longitude);
+            locationInfo.setLatitude(latLngAtCameraCenter.latitude);
+            locationInfo.setLongitude(latLngAtCameraCenter.longitude);
             locationInfo.setOn_off_street("On");
             locationInfo.setStreet_name("\uD83C\uDD7F  " + parkLoc.getStreetName());
             locationInfo.setTime(str);
             databaseAccessor.createLocationInfo(locationInfo);
 
 
-            map.addMarker(new MarkerOptions()
-                            .position(latlngAtCameraCenter)
+            theMap.addMarker(new MarkerOptions()
+                            .position(latLngAtCameraCenter)
                             .title("I parked here")
                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
             );
@@ -418,13 +404,13 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     public void saveButton(View view) {
         //Location c = m;    // m is a data field in the MapsActivity class
 
-        if (latlngAtCameraCenter != null) {
+        if (latLngAtCameraCenter != null) {
             Calendar calendar = Calendar.getInstance();
             Date d = calendar.getTime();
             String str = d.toString();
             LocationInfo locationInfo = new LocationInfo();
-            locationInfo.setLatitude(latlngAtCameraCenter.latitude);
-            locationInfo.setLongitude(latlngAtCameraCenter.longitude);
+            locationInfo.setLatitude(latLngAtCameraCenter.latitude);
+            locationInfo.setLongitude(latLngAtCameraCenter.longitude);
             locationInfo.setOn_off_street(parkLoc.getOnOffStreet());
             locationInfo.setStreet_name(parkLoc.getStreetName());
             locationInfo.setTime(str);
@@ -456,17 +442,17 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     }
 
     public void zoomButton(View view) {
-        float zoom = map.getCameraPosition().zoom;
+        float zoom = theMap.getCameraPosition().zoom;
         if(zoom==20.0f)
         {
-            map.animateCamera(CameraUpdateFactory.zoomTo( 15.0f ));
+            theMap.animateCamera(CameraUpdateFactory.zoomTo( 15.0f ));
         }else
-            map.animateCamera(CameraUpdateFactory.zoomTo( 20.0f ));
+            theMap.animateCamera(CameraUpdateFactory.zoomTo( 20.0f ));
     }
 
     /**
      * gives sfparkQueryUrl a query string from URLMaker using the given params
-     * @param latitude the latitude to inclde in the string
+     * @param latitude the latitude to include in the string
      * @param longitude the longitude to include in the string
      * @param radius the radius to include in the string.
      */
@@ -480,37 +466,31 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     //empty inherited methods
     @Override
     public void onLocationChanged(Location location) {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult arg0) {
-        // TODO Auto-generated method stub
 
     }
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        // TODO Auto-generated method stub
         setupMap();
 
     }
@@ -521,10 +501,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     }
 
     //@Override
-    public void onDisconnected() {
-        // TODO Auto-generated method stub
+    /*public void onDisconnected() {
 
-    }
+    }*/
     //end empty inherited methods
 
     /**
@@ -568,22 +547,21 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         protected String doInBackground(String... params) {
 
             try {
-                geocoder = new Geocoder(MapsActivity.this, Locale.ENGLISH);
+                Geocoder geocoder = new Geocoder(MapsActivity.this, Locale.ENGLISH);
                 addressesFromGeocoder = geocoder.getFromLocation(x, y, 1);
                 str = new StringBuilder();
-                if (geocoder.isPresent()) {
+                if (Geocoder.isPresent()) {
                     Address returnAddress = addressesFromGeocoder.get(0);
 
                     String localityString = returnAddress.getLocality();
                     String city = returnAddress.getCountryName();
                     String region_code = returnAddress.getCountryCode();
-                    String zipcode = returnAddress.getPostalCode();
+                    String zipCode = returnAddress.getPostalCode();
 
-                    str.append(localityString + "");
-                    str.append(city + "" + region_code + "");
-                    str.append(zipcode + "");
+                    str.append(localityString).append("");
+                    str.append(city).append("").append(region_code).append("");
+                    str.append(zipCode).append("");
 
-                } else {
                 }
             } catch (IOException e) {
                 Log.e("tag", e.getMessage());
@@ -614,7 +592,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
          * interface while the background computation is still executing. For instance, it can be
          * used to animate a progress bar or show logs in a text field.
          *
-         * @param values
+         * @param values default
          */
         @Override
         protected void onProgressUpdate(Void... values) {
