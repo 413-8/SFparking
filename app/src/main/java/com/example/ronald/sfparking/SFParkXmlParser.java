@@ -72,7 +72,8 @@ public class SFParkXmlParser {
     }
 
     /**
-     * looks for TYPE, NAME and RATES tags and then sets those fields in a new ParkLocation object.
+     * looks for TYPE, NAME, RATES, DESC and TEL tags and then sets those fields
+     * in a new ParkLocation object.
      * @param parser the XmlPullParser to be used
      * @return A new location object with fields filled in by data from the xml file.
      * @throws XmlPullParserException if the parser fails.
@@ -80,25 +81,45 @@ public class SFParkXmlParser {
      */
     private static ParkLocation readParkLocation(XmlPullParser parser)
             throws XmlPullParserException, IOException {
+        ParkLocation temp;
         parser.require(XmlPullParser.START_TAG, ns, "AVL");
         String onOffStreet = "";
-        String stName = "";
+        String locName = "";
+        String desc = "";
+        String phone = "";
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
             String name = parser.getName();
-            if (name.equals("TYPE")) {
-                onOffStreet = readType(parser);
-            } else if (name.equals("NAME")) {
-                stName = readName(parser);
-            } else if (name.equals("RATES")) {
-                rates = readRates(parser);
-            } else {
-                skip(parser);
+
+            switch (name) {
+                case "TYPE":
+                    onOffStreet = readType(parser);
+                    break;
+                case "NAME":
+                    locName = readName(parser);
+                    break;
+                case "RATES":
+                    rates = readRates(parser);
+                    break;
+                case "DESC":
+                    desc = readDesc(parser);
+                    break;
+                case "TEL":
+                    phone = readPhone(parser);
+                    break;
+                default:
+                    skip(parser);
+                    break;
             }
         }
-        return new ParkLocation(onOffStreet, stName, rates);
+        if(desc.equals("")) {
+            temp = new ParkLocation(onOffStreet, locName, rates);
+        } else {
+            temp = new ParkLocation(onOffStreet, locName, rates, desc, phone);
+        }
+        return temp;
     }
 
     /**
@@ -130,6 +151,34 @@ public class SFParkXmlParser {
     }
 
     /**
+     * process DESC tags in the feed
+     * @param parser the XmlPullParser to be used
+     * @return the String tagged by DESC
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
+    private static String readDesc(XmlPullParser parser) throws XmlPullParserException, IOException {
+        parser.require(XmlPullParser.START_TAG, ns, "DESC");
+        String name = readText(parser);
+        parser.require(XmlPullParser.END_TAG, ns, "DESC");
+        return name;
+    }
+
+    /**
+     * process TEL tags in the feed
+     * @param parser the XmlPullParser to be used
+     * @return the String tagged by TEL
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
+    private static String readPhone(XmlPullParser parser) throws XmlPullParserException, IOException {
+        parser.require(XmlPullParser.START_TAG, ns, "TEL");
+        String name = readText(parser);
+        parser.require(XmlPullParser.END_TAG, ns, "TEL");
+        return name;
+    }
+
+    /**
      * process RATES tags in the feed
      * @param parser the XmlPullParser to be used
      * @return an ArrayList of RateInfo objects
@@ -156,7 +205,7 @@ public class SFParkXmlParser {
     }
 
     /**
-     * looks for BEG, END, RATE and RQ tags
+     * looks for BEG, END, RATE, RQ, DESC and RR tags
      * @param parser the XmlPullParser to be used
      * @return a RateInfo object
      * @throws XmlPullParserException
@@ -173,16 +222,29 @@ public class SFParkXmlParser {
                 continue;
             }
             String name = parser.getName();
-            if (name.equals("BEG")) {
-                temp.setBeg(readText(parser));
-            } else if (name.equals("END")) {
-                temp.setEnd(readText(parser));
-            } else if (name.equals("RATE")) {
-                temp.setRate(readText(parser));
-            } else if (name.equals("RQ")) {
-                temp.setRq(readText(parser));
-            }else {
-                skip(parser);
+
+            switch (name) {
+                case "BEG":
+                    temp.setBeg(readText(parser));
+                    break;
+                case "END":
+                    temp.setEnd(readText(parser));
+                    break;
+                case "RATE":
+                    temp.setRate(readText(parser));
+                    break;
+                case "RQ":
+                    temp.setRq(readText(parser));
+                    break;
+                case "DESC":
+                    temp.setDesc(readText(parser));
+                    break;
+                case "RR":
+                    temp.setRr(readText(parser));
+                    break;
+                default:
+                    skip(parser);
+                    break;
             }
         }
         return temp;
