@@ -70,10 +70,12 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     private ParkLocation parkLoc;
     private String sfparkQueryUrl;
-    final String radius = "0.010"; // approx. 37ft for accuracy 0.007
+    final String radius = "0.010"; // approx. 53ft for accuracy (0.010 miles)
     String streetName = "";
     String onOffSt = "";
     String rates = "";
+    String address = "";
+    String phone = "";
 
     // UI element reference variables
     private static CustomMapFragment customMapFragment;
@@ -297,7 +299,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     }
 
     /**
-     * Sets up the information panel when a marker is placed on theMap by sending a query to the
+     * Sets up the information panel by sending a query to the
      * SFPark server.
      */
     public void queryAndDisplaySfparkData() {
@@ -306,25 +308,33 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                     Double.toString(latLngAtCameraCenter.longitude),
                     radius);
             parkLoc = new httpRequest(getApplicationContext()).execute(sfparkQueryUrl).get();
-            streetName = parkLoc.getStreetName();
+            streetName = parkLoc.getName();
             if (streetName.equals("No Data")) {
                 park_data_text_view.setText("\tNo Data");
-                // Set up panel when pin is dropped with No data
+                // Set up panel with No data
                 setUpPanelWithoutData();
             } else {
                 onOffSt = parkLoc.getOnOffStreet();
                 rates = parkLoc.getRates();
-                park_data_text_view.setText("\tStreet Name: "
-                        + streetName + "\n\tType: "
-                        + onOffSt
-                        + " street."
-                        + "\n\tRates:\n"
-                        + rates);
-                // Set up panel when pin is dropped with data
+
+                if(onOffSt.equals("Meter")) {
+                    park_data_text_view.setText("\tStreet Name: "
+                            + streetName + "\n\tType: "
+                            + onOffSt
+                            + "\n\tRates:\n"
+                            + rates);
+                } else {
+                    address = parkLoc.getAddress();
+                    phone = parkLoc.getPhone();
+                    park_data_text_view.setText("\tName: " + streetName +
+                                                "\n\tType: " + onOffSt +
+                                                "\n\tAddress: " + address +
+                                                "\n\tPhone: " + phone +
+                                                "\n\tRates:\n" + rates);
+                }
+                // Set up panel when info is available
                 setUpPanelWithData();
             }
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -381,7 +391,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             parkLocationInfo.setLatitude(latLngAtCameraCenter.latitude);
             parkLocationInfo.setLongitude(latLngAtCameraCenter.longitude);
             parkLocationInfo.setOnOffStreet("On");
-            parkLocationInfo.setStreetName("\uD83C\uDD7F  " + parkLoc.getStreetName());
+            parkLocationInfo.setStreetName("\uD83C\uDD7F  " + parkLoc.getName());
             parkLocationInfo.setTime(str);
             parkedDbAccessor.createLocationInfo(parkLocationInfo);
 
@@ -417,7 +427,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             parkLocationInfo.setLatitude(latLngAtCameraCenter.latitude);
             parkLocationInfo.setLongitude(latLngAtCameraCenter.longitude);
             parkLocationInfo.setOnOffStreet(parkLoc.getOnOffStreet());
-            parkLocationInfo.setStreetName(parkLoc.getStreetName());
+            parkLocationInfo.setStreetName(parkLoc.getName());
             parkLocationInfo.setTime(str);
             savedDbAccessor.createLocationInfo(parkLocationInfo);
             Context context = getApplicationContext();
