@@ -47,6 +47,15 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ParkedLocations"
+            android:label="@string/title_activity_parked_locations" >
+            <intent-filter>
+                <action android:name=".ParkedLocations" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".SavedLocations"
             android:label="@string/title_activity_saved_locations" >
             <intent-filter>

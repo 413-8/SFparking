@@ -55,7 +55,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     // map handlers
     private static GoogleMap theMap;
-    private static Park_LocationDataSource databaseAccessor;
+    private static ParkedDbAccessor parkedDbAccessor;
+    private static SavedDbAccessor savedDbAccessor;
     /**
      * Stores the current instantiation of the location client in this object
      */
@@ -89,16 +90,20 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        customMapFragment = ((CustomMapFragment) getSupportFragmentManager().findFragmentById(R.id.map));
-        sliding_layout_container = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout_container);
-        park_data_text_view = (TextView) findViewById(R.id.park_data_text_view);
+        customMapFragment = ((CustomMapFragment) getSupportFragmentManager().findFragmentById(id.map));
+        sliding_layout_container = (SlidingUpPanelLayout) findViewById(id.sliding_layout_container);
+        park_data_text_view = (TextView) findViewById(id.park_data_text_view);
         parkButton = (Button) findViewById(id.park_button);
-        saveButton = (Button) findViewById(R.id.save_button);
+        saveButton = (Button) findViewById(id.save_button);
         // hover_layout = (LinearLayout) findViewById(id.hoverPin); // not needed unless we want to hide it sometimes
 
-        databaseAccessor = new Park_LocationDataSource(this);
-        databaseAccessor.write();
-        databaseAccessor.read();
+        parkedDbAccessor = new ParkedDbAccessor(this);
+        parkedDbAccessor.write();
+        parkedDbAccessor.read();
+
+        savedDbAccessor = new SavedDbAccessor(this);
+        savedDbAccessor.write();
+        savedDbAccessor.read();
 
         addressAtCenterPin = (TextView) findViewById(id.addressText);
         //    markerLayout = (LinearLayout) findViewById(R.id.locationMarker);
@@ -372,13 +377,13 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             Calendar calendar = Calendar.getInstance();
             Date d = calendar.getTime();
             String str = d.toString();
-            LocationInfo locationInfo = new LocationInfo();
-            locationInfo.setLatitude(latLngAtCameraCenter.latitude);
-            locationInfo.setLongitude(latLngAtCameraCenter.longitude);
-            locationInfo.setOn_off_street("On");
-            locationInfo.setStreet_name("\uD83C\uDD7F  " + parkLoc.getStreetName());
-            locationInfo.setTime(str);
-            databaseAccessor.createLocationInfo(locationInfo);
+            ParkLocationInfo parkLocationInfo = new ParkLocationInfo();
+            parkLocationInfo.setLatitude(latLngAtCameraCenter.latitude);
+            parkLocationInfo.setLongitude(latLngAtCameraCenter.longitude);
+            parkLocationInfo.setOnOffStreet("On");
+            parkLocationInfo.setStreetName("\uD83C\uDD7F  " + parkLoc.getStreetName());
+            parkLocationInfo.setTime(str);
+            parkedDbAccessor.createLocationInfo(parkLocationInfo);
 
 
             theMap.addMarker(new MarkerOptions()
@@ -408,13 +413,13 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             Calendar calendar = Calendar.getInstance();
             Date d = calendar.getTime();
             String str = d.toString();
-            LocationInfo locationInfo = new LocationInfo();
-            locationInfo.setLatitude(latLngAtCameraCenter.latitude);
-            locationInfo.setLongitude(latLngAtCameraCenter.longitude);
-            locationInfo.setOn_off_street(parkLoc.getOnOffStreet());
-            locationInfo.setStreet_name(parkLoc.getStreetName());
-            locationInfo.setTime(str);
-            databaseAccessor.createLocationInfo(locationInfo);
+            ParkLocationInfo parkLocationInfo = new ParkLocationInfo();
+            parkLocationInfo.setLatitude(latLngAtCameraCenter.latitude);
+            parkLocationInfo.setLongitude(latLngAtCameraCenter.longitude);
+            parkLocationInfo.setOnOffStreet(parkLoc.getOnOffStreet());
+            parkLocationInfo.setStreetName(parkLoc.getStreetName());
+            parkLocationInfo.setTime(str);
+            savedDbAccessor.createLocationInfo(parkLocationInfo);
             Context context = getApplicationContext();
             CharSequence message = "Location Saved \uD83D\uDC4D";
             Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
@@ -438,7 +443,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
      */
     public void historyButton(View view) {
 
-        startActivity(new Intent(".SavedLocations"));
+        startActivity(new Intent(".ParkedLocations"));
     }
 
     public void zoomButton(View view) {

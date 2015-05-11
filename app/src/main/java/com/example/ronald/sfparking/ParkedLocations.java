@@ -2,23 +2,22 @@ package com.example.ronald.sfparking;
 
 import android.graphics.Color;
 import android.graphics.Point;
-import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
 import android.view.Display;
 import android.view.Gravity;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-
 import java.util.Stack;
 
 /**
  * Created by Toren on 4/25/2015
  * Purpose: The activity will display the saved parking location(s) saved in the SQLite database to the user
  */
-public class SavedLocations extends ActionBarActivity {
-    private SavedDbAccessor dataSource;
+public class ParkedLocations extends ActionBarActivity {
+    private ParkedDbAccessor dataSource;
 /*    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,7 +57,7 @@ public class SavedLocations extends ActionBarActivity {
         int rl = row.length;
         int cl = column.length;
 
-        dataSource = new SavedDbAccessor(this);
+        dataSource = new ParkedDbAccessor(this);
         dataSource.open();
 
         ScrollView sv = new ScrollView(this);
