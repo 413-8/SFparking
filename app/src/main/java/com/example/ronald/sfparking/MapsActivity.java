@@ -86,6 +86,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     //Timer layout and reference variables
     private static LinearLayout timer_layout;
     private static myNumberPicker timerPicker;
+    private Intent i;
+
 
 
     // UI element reference variables
@@ -473,6 +475,13 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             isParked = false;
             parkButton.setText("Park");
             parkButton.setChecked(false);
+
+            if(i != null)
+            {Context context = getApplicationContext();
+                Toast toast = Toast.makeText(context, "Timer Cancelled", Toast.LENGTH_SHORT);
+                toast.show();
+                stopService(i); i=null;}
+
         }
 
     }
@@ -497,14 +506,13 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
         park_save_hist_layout.setVisibility(LinearLayout.VISIBLE);
         timer_layout.setVisibility(LinearLayout.GONE);
+
     }
 
     public void set_timer(View view){
 
-        Intent i = new Intent(this, countDownTimer.class);
-        Log.d("mytag", "millis = " + timerPicker.getMilliseconds());
+        i = new Intent(this, countDownTimer.class);
         i.putExtra("millis", timerPicker.getMilliseconds());
-
 
         startService(i);
         cancel_timer(view);
