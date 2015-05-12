@@ -143,10 +143,38 @@ public class ParkedDbAccessor {
             return location;
         }
 
+        /**
+         * Clears all entries from the parked locations database and prints to the console
+         * how many entries were removed.
+         */
         public void clear() {
             int deleteCatch;
             deleteCatch = database.delete(SqlEntry.TABLE_NAME, null, null);
             System.out.println("" + deleteCatch + " rows removed from parked.db");
+        }
+
+        /**
+         * Checks if the parked locations database is currently empty by using the Cursor object
+         * method moveToFirst(), which returns a boolean value depending on what the Cursor object
+         * is pointing to (false if Cursor object is empty).
+         * @return true if database is empty, false if not.
+         */
+        public boolean isEmpty() {
+            Cursor cursor = database.query(
+                    SqlEntry.TABLE_NAME,
+                    allColumns,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
+
+            // cursor.moveToFirst() returns false if cursor is pointing to an empty array.
+            if (cursor.moveToFirst())
+                return false;
+            else
+                return true;
         }
 
         /**
