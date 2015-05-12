@@ -102,8 +102,7 @@ public class ParkedDbAccessor {
 
             );
             cursor.moveToFirst();
-            ParkLocationInfo location = new ParkLocationInfo();
-            location = cursorToLocationInfo(cursor);
+            ParkLocationInfo location = cursorToLocationInfo(cursor);
             cursor.close();
             return location;
         }
@@ -122,15 +121,13 @@ public class ParkedDbAccessor {
      * gets all locations in the database table as a stack with the newest entry on top.
      * @return a stack of all of the locations in the database history table.
      */
-        public Stack<ParkLocationInfo> getAllLocations() {
+        public ParkLocationInfo getParkedLocation() {
             /*
             starts by pointing at oldest entry and adding it to stack.
             then loops, adding the ParkLocationInfo objects, checking id and breaking if it encounters
             the oldest entry's id again.
              */
             ParkLocationInfo location;
-            Stack<ParkLocationInfo> locations = new Stack<ParkLocationInfo>();
-            String seeker = SqlEntry.COLUMN_ID + " = " + oldestID;
             Cursor cursor = database.query(
                     SqlEntry.TABLE_NAME,
                     allColumns,
@@ -141,36 +138,15 @@ public class ParkedDbAccessor {
                     null
             );
             cursor.moveToFirst();
-            if (cursor.isNull(0)) {
-               return locations;
-            }
-            if(oldestID==1)
-            {
-                while(!cursor.isAfterLast())
-                {
-                    location = cursorToLocationInfo(cursor);
-                    locations.push(location);
-                    cursor.moveToNext();
-                }
-                cursor.close();
-                return locations;
-            }
-            cursor.move((oldestID-1));
             location = cursorToLocationInfo(cursor);
-            locations.push(location);
-            cursor.moveToNext();
-            if(cursor.isAfterLast())
-                cursor.moveToFirst();
-            while (cursor.getInt(cursor.getColumnIndex(SqlEntry.COLUMN_ID))!=oldestID) {
-                location = cursorToLocationInfo(cursor);
-                locations.push(location);
-                cursor.moveToNext();
-                if(cursor.isAfterLast()){
-                    cursor.moveToFirst();
-                }
-            }
             cursor.close();
-            return locations;
+            return location;
+        }
+
+        public void clear() {
+            int deleteCatch;
+            deleteCatch = database.delete(SqlEntry.TABLE_NAME, null, null);
+            System.out.println("" + deleteCatch + " rows removed from parked.db");
         }
 
         /**

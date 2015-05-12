@@ -109,7 +109,7 @@ public class ParkedLocations extends ActionBarActivity {
         tableRowParams.weight = 1; //unknown
 
         Stack<ParkLocationInfo> locations = new Stack<ParkLocationInfo>();
-        locations = dataSource.getAllLocations();
+        // locations = dataSource.getAllLocations();
         ParkLocationInfo currentLocation;
 
 

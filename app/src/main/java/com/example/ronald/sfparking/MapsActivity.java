@@ -77,6 +77,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     String rates = "";
     String address = "";
     String phone = "";
+    private boolean isParked;
 
     // UI element reference variables
     private static CustomMapFragment customMapFragment;
@@ -193,6 +194,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                     mGoogleApiClient);
 
             LatLng latLong;
+
 
             theMap = customMapFragment.getMap();
             theMap.setIndoorEnabled(false);
@@ -388,31 +390,41 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
      */
     public void parkButton(View view) {
         theMap.clear();
-        if (latLngAtCameraCenter != null) {
-            Calendar calendar = Calendar.getInstance();
-            Date d = calendar.getTime();
-            String str = d.toString();
-            ParkLocationInfo parkLocationInfo = new ParkLocationInfo();
-            parkLocationInfo.setLatitude(latLngAtCameraCenter.latitude);
-            parkLocationInfo.setLongitude(latLngAtCameraCenter.longitude);
-            parkLocationInfo.setOnOffStreet("On");
-            parkLocationInfo.setStreetName("\uD83C\uDD7F  " + parkLoc.getName());
-            parkLocationInfo.setTime(str);
-            parkedDbAccessor.createLocationInfo(parkLocationInfo);
+        if (!isParked) {
+            if (latLngAtCameraCenter != null) {
+                Calendar calendar = Calendar.getInstance();
+                Date d = calendar.getTime();
+                String str = d.toString();
+                ParkLocationInfo parkLocationInfo = new ParkLocationInfo();
+                parkLocationInfo.setLatitude(latLngAtCameraCenter.latitude);
+                parkLocationInfo.setLongitude(latLngAtCameraCenter.longitude);
+                parkLocationInfo.setOnOffStreet("On");
+                parkLocationInfo.setStreetName( /*"\uD83C\uDD7F  " + */ parkLoc.getName());
+                parkLocationInfo.setTime(str);
+                parkedDbAccessor.createLocationInfo(parkLocationInfo);
 
 
-            theMap.addMarker(new MarkerOptions()
-                            .position(latLngAtCameraCenter)
-                            .title("I parked here")
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-            );
+                theMap.addMarker(new MarkerOptions()
+                                .position(latLngAtCameraCenter)
+                                .title("I parked here")
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                );
+
+                isParked = true;
+                parkButton.setText("Unpark");
+            } else {
+                Context context = getApplicationContext();
+                CharSequence text = "Current Location Not Available!!!";
+                int duration = Toast.LENGTH_SHORT;
+
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+            }
         } else {
-            Context context = getApplicationContext();
-            CharSequence text = "Current Location Not Available!!!";
-            int duration = Toast.LENGTH_SHORT;
-
-            Toast toast = Toast.makeText(context, text, duration);
-            toast.show();
+            theMap.clear();
+            parkedDbAccessor.clear();
+            isParked = false;
+            parkButton.setText("Park");
         }
 
     }
@@ -427,13 +439,13 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         if (latLngAtCameraCenter != null) {
             Calendar calendar = Calendar.getInstance();
             Date d = calendar.getTime();
-            String str = d.toString();
+            String time = d.toString();
             ParkLocationInfo parkLocationInfo = new ParkLocationInfo();
             parkLocationInfo.setLatitude(latLngAtCameraCenter.latitude);
             parkLocationInfo.setLongitude(latLngAtCameraCenter.longitude);
             parkLocationInfo.setOnOffStreet(parkLoc.getOnOffStreet());
             parkLocationInfo.setStreetName(parkLoc.getName());
-            parkLocationInfo.setTime(str);
+            parkLocationInfo.setTime(time);
             savedDbAccessor.createLocationInfo(parkLocationInfo);
             Context context = getApplicationContext();
             CharSequence message = "Location Saved \uD83D\uDC4D";
