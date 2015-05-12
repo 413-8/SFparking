@@ -23,6 +23,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -79,11 +80,19 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     String address = "";
     String phone = "";
     private boolean isParked;
+    private boolean isData;
+
+
+    //Timer layout and reference variables
+    private static LinearLayout timer_layout;
+    private static myNumberPicker timerPicker;
+
 
     // UI element reference variables
     private static CustomMapFragment customMapFragment;
     private static SlidingUpPanelLayout sliding_layout_container;
     private static ScrollView sliding_up_layout_scrollview;
+    private static LinearLayout park_save_hist_layout;
     private static TextView park_data_text_view;
     private static TextView addressAtCenterPin;
  // private static LinearLayout hover_layout; //not needed unless we want to hide it sometimes
@@ -99,10 +108,16 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         customMapFragment = (CustomMapFragment) getSupportFragmentManager().findFragmentById(id.map);
         sliding_layout_container = (SlidingUpPanelLayout) findViewById(id.sliding_layout_container);
         sliding_up_layout_scrollview = (ScrollView) findViewById(id.sliding_up_layout_scrollview);
+        park_save_hist_layout = (LinearLayout) findViewById(id.ParkSaveHist_Layout);
         park_data_text_view = (TextView) findViewById(id.park_data_text_view);
         parkButton = (ToggleButton) findViewById(id.park_button);
         saveButton = (Button) findViewById(id.save_button);
         // hover_layout = (LinearLayout) findViewById(id.hoverPin); // not needed unless we want to hide it sometimes
+
+
+        //create timepicker
+        timer_layout = (LinearLayout) findViewById(id.timer_layout);
+        timerPicker = new myNumberPicker(this);
 
         parkedDbAccessor = new ParkedDbAccessor(this);
         parkedDbAccessor.write();
@@ -325,6 +340,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                 park_data_text_view.setText("\tNo Data");
                 // Set up panel with No data
                 setUpPanelWithoutData();
+                isData = false;
             } else {
                 onOffSt = parkLoc.getOnOffStreet();
                 rates = parkLoc.getRates();
@@ -346,6 +362,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                 }
                 // Set up panel when info is available
                 setUpPanelWithData();
+                isData = true;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -383,7 +400,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         parkButton.setEnabled(true);
         saveButton.setEnabled(false);
         sliding_up_layout_scrollview.getLayoutParams().height = 100;
-        sliding_layout_container.setPanelHeight(200);
+        sliding_layout_container.setPanelHeight(300);
         sliding_layout_container.setTouchEnabled(false);
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
@@ -417,6 +434,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         theMap.clear();
         if (!isParked) {
             if (latLngAtCameraCenter != null) {
+
+                setUpTimerLayout();
+
                 Calendar calendar = Calendar.getInstance();
                 Date d = calendar.getTime();
                 String str = d.toString();
@@ -455,6 +475,39 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             parkButton.setChecked(false);
         }
 
+    }
+
+    public void setUpTimerLayout(){
+        sliding_layout_container.setAnchorPoint(0.7f);
+        park_save_hist_layout.setVisibility(LinearLayout.GONE);
+        timer_layout.setVisibility(LinearLayout.VISIBLE);
+        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+        sliding_layout_container.setTouchEnabled(false);
+
+        timerPicker.defaultValues();
+
+    }
+
+
+    public void cancel_timer(View view){
+        if(isData)
+            setUpPanelWithData();
+        else
+            setUpPanelWithoutData();
+
+        park_save_hist_layout.setVisibility(LinearLayout.VISIBLE);
+        timer_layout.setVisibility(LinearLayout.GONE);
+    }
+
+    public void set_timer(View view){
+
+        Intent i = new Intent(this, countDownTimer.class);
+        Log.d("mytag", "millis = " + timerPicker.getMilliseconds());
+        i.putExtra("millis", timerPicker.getMilliseconds());
+
+
+        startService(i);
+        cancel_timer(view);
     }
 
     /**
