@@ -23,6 +23,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -80,6 +81,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     // UI element reference variables
     private static CustomMapFragment customMapFragment;
     private static SlidingUpPanelLayout sliding_layout_container;
+    private static ScrollView sliding_up_layout_scrollview;
     private static TextView park_data_text_view;
     private static TextView addressAtCenterPin;
  // private static LinearLayout hover_layout; //not needed unless we want to hide it sometimes
@@ -92,8 +94,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        customMapFragment = ((CustomMapFragment) getSupportFragmentManager().findFragmentById(id.map));
+        customMapFragment = (CustomMapFragment) getSupportFragmentManager().findFragmentById(id.map);
         sliding_layout_container = (SlidingUpPanelLayout) findViewById(id.sliding_layout_container);
+        sliding_up_layout_scrollview = (ScrollView) findViewById(id.sliding_up_layout_scrollview);
         park_data_text_view = (TextView) findViewById(id.park_data_text_view);
         parkButton = (Button) findViewById(id.park_button);
         saveButton = (Button) findViewById(id.save_button);
@@ -191,7 +194,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
             LatLng latLong;
 
-
             theMap = customMapFragment.getMap();
             theMap.setIndoorEnabled(false);
 
@@ -236,7 +238,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
                             queryAndDisplayGoogleData();
                             queryAndDisplaySfparkData();
-                            park_data_text_view.setVisibility(View.VISIBLE);
+                            sliding_up_layout_scrollview.setVisibility(View.VISIBLE);
                     }
                 }
             });
@@ -277,7 +279,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             }); */
             latLngAtCameraCenter = latLong;
             queryAndDisplayGoogleData();
-            setUpPanelDefault();
+            queryAndDisplaySfparkData();
+            sliding_up_layout_scrollview.setVisibility(View.VISIBLE);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -346,8 +349,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     public void setUpPanelDefault() {
         parkButton.setEnabled(false);
         saveButton.setEnabled(false);
-        park_data_text_view.setVisibility(View.GONE);
-        sliding_layout_container.setPanelHeight(110);
+        sliding_up_layout_scrollview.setVisibility(View.GONE);
+        sliding_layout_container.setPanelHeight(100);
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         sliding_layout_container.setTouchEnabled(false);
     }
@@ -358,9 +361,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     public void setUpPanelWithData() {
         parkButton.setEnabled(true);
         saveButton.setEnabled(true);
-        sliding_layout_container.setPanelHeight(300);
-        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
-        sliding_layout_container.setTouchEnabled(true);
+        sliding_up_layout_scrollview.getLayoutParams().height = 300;
+        sliding_layout_container.setPanelHeight(400);
+        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        sliding_layout_container.setTouchEnabled(false);
     }
 
     /**
@@ -369,8 +373,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     public void setUpPanelWithoutData() {
         parkButton.setEnabled(true);
         saveButton.setEnabled(false);
-        sliding_layout_container.setPanelHeight(190);
-        sliding_layout_container.setTouchEnabled(true);
+        sliding_up_layout_scrollview.getLayoutParams().height = 100;
+        sliding_layout_container.setPanelHeight(200);
+        sliding_layout_container.setTouchEnabled(false);
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
 
@@ -453,16 +458,16 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
      */
     public void historyButton(View view) {
 
-        startActivity(new Intent(".ParkedLocations"));
+        startActivity(new Intent(".SavedLocations"));
     }
 
     public void zoomButton(View view) {
         float zoom = theMap.getCameraPosition().zoom;
-        if(zoom==20.0f)
+        if(zoom==18.0f)
         {
             theMap.animateCamera(CameraUpdateFactory.zoomTo( 15.0f ));
         }else
-            theMap.animateCamera(CameraUpdateFactory.zoomTo( 20.0f ));
+            theMap.animateCamera(CameraUpdateFactory.zoomTo( 18.0f ));
     }
 
     /**
