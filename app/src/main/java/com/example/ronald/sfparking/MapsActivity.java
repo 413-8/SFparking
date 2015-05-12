@@ -26,6 +26,7 @@ import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -86,7 +87,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     private static TextView park_data_text_view;
     private static TextView addressAtCenterPin;
  // private static LinearLayout hover_layout; //not needed unless we want to hide it sometimes
-    private static Button parkButton;
+    private static ToggleButton parkButton;
     private static Button saveButton;
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -99,7 +100,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         sliding_layout_container = (SlidingUpPanelLayout) findViewById(id.sliding_layout_container);
         sliding_up_layout_scrollview = (ScrollView) findViewById(id.sliding_up_layout_scrollview);
         park_data_text_view = (TextView) findViewById(id.park_data_text_view);
-        parkButton = (Button) findViewById(id.park_button);
+        parkButton = (ToggleButton) findViewById(id.park_button);
         saveButton = (Button) findViewById(id.save_button);
         // hover_layout = (LinearLayout) findViewById(id.hoverPin); // not needed unless we want to hide it sometimes
 
@@ -159,6 +160,11 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
         }
 
+
+    }
+
+    protected void onStart(){
+        super.onStart();
 
     }
 
@@ -283,6 +289,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             queryAndDisplayGoogleData();
             queryAndDisplaySfparkData();
             sliding_up_layout_scrollview.setVisibility(View.VISIBLE);
+            parkedMarkerLoader();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -348,14 +355,14 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     /**
      * Sets up sliding_layout_container for a default view
      */
-    public void setUpPanelDefault() {
+    /*public void setUpPanelDefault() {
         parkButton.setEnabled(false);
         saveButton.setEnabled(false);
         sliding_up_layout_scrollview.setVisibility(View.GONE);
         sliding_layout_container.setPanelHeight(100);
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         sliding_layout_container.setTouchEnabled(false);
-    }
+    }*/
 
     /**
      * Sets up sliding_layout_container for a location that has no data form SFPark
@@ -379,6 +386,24 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         sliding_layout_container.setPanelHeight(200);
         sliding_layout_container.setTouchEnabled(false);
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+    }
+
+    public void parkedMarkerLoader() {
+        theMap.clear();
+        isParked = !parkedDbAccessor.isEmpty();
+        if (isParked) {
+            LatLng parkedLatLng = new LatLng(parkedDbAccessor.getParkedLocation().getLatitude(),
+                    parkedDbAccessor.getParkedLocation().getLongitude());
+            theMap.addMarker(new MarkerOptions()
+                    .position(parkedLatLng)
+                    .title("I parked here")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+            );
+            parkButton.setText("Unpark");
+            parkButton.setChecked(true);
+        } else {
+            isParked = false;
+        }
     }
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -412,6 +437,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
                 isParked = true;
                 parkButton.setText("Unpark");
+                parkButton.setChecked(true);
+                //parkButton.getBackground().setColorFilter(0xFF00FF00, PorterDuff.Mode.MULTIPLY);
             } else {
                 Context context = getApplicationContext();
                 CharSequence text = "Current Location Not Available!!!";
@@ -425,6 +452,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             parkedDbAccessor.clear();
             isParked = false;
             parkButton.setText("Park");
+            parkButton.setChecked(false);
         }
 
     }
@@ -450,7 +478,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             Context context = getApplicationContext();
             CharSequence message = "Location Saved \uD83D\uDC4D";
             Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+            toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
             toast.show();
 
         } else {

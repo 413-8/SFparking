@@ -169,7 +169,11 @@
                 android:divider="?android:dividerHorizontal"
                 android:showDividers="beginning|middle|end">
 
-                <Button
+                <ToggleButton
+                    android:textOff="Park"
+                    android:textOn="Unpark"
+                    android:textAllCaps="false"
+                    android:background="@drawable/custom_button"
                     android:id="@+id/park_button"
                     style="?android:buttonBarButtonStyle"
                     android:layout_width="0dp"
