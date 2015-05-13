@@ -123,7 +123,7 @@ public class SavedLocations extends ActionBarActivity {
                 currentLocation = locations.pop();
             }
 
-            for (int j = 0; j <= 4; j++) {
+            for (int j = 0; j <= 5; j++) {
 
                 TableRow tableRow = new TableRow(this);
                 tableRow.setBackgroundColor(Color.BLACK);
@@ -147,6 +147,8 @@ public class SavedLocations extends ActionBarActivity {
                         textView.setText("" + currentLocation.getOnOffStreet() + "-street Parking");
                         System.out.println("case 3");
                         break;
+                    case 3:
+                        textView.setText("Rates:" + currentLocation.getRates());
 
                 }
 

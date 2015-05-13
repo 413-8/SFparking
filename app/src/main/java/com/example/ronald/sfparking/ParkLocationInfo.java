@@ -11,12 +11,12 @@ public class ParkLocationInfo {
     private String time;
     private String streetName;
     private String onOffStreet;
-    private ArrayList<RateInfo> rates;
+    private String rates;
     private int id;
 
     public ParkLocationInfo(){}
 
-    public ParkLocationInfo(int _id, double _latitude, double _longitude, String _on_off_street, String _street_name, String _time, ArrayList<RateInfo> _rates){
+    public ParkLocationInfo(int _id, double _latitude, double _longitude, String _on_off_street, String _street_name, String _time, String _rates){
         time = _time;
         streetName = _street_name;
         onOffStreet = _on_off_street;
@@ -67,12 +67,7 @@ public class ParkLocationInfo {
      * @return a formatted string of rates and times
      */
     public String getRates(){
-        StringBuilder result = new StringBuilder();
-        // Loop through elements.
-        for (RateInfo obj : rates) {
-            result.append(obj.toString());
-        }
-        return result.toString();
+        return rates;
     }
 
     /**
@@ -119,6 +114,6 @@ public class ParkLocationInfo {
      * Sets the rates of the current ParkLocationInfo object to the rates passed in the method call.
      * @param newRates ArrayList of new RateInfo objects (contain rates and time intervals)
      */
-    public void setRates(ArrayList<RateInfo> newRates) {this.rates = newRates;}
+    public void setRates(String newRates) {this.rates = newRates;}
 
 }
