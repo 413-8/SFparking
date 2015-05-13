@@ -130,25 +130,16 @@
             android:id="@+id/sliding_up_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:divider="?android:dividerHorizontal"
             android:orientation="vertical"
-            android:showDividers="beginning|middle|end">
-
-            <!--TextView displaying the timer countdown-->
-            <TextView
-                android:id="@+id/chronometer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Timer: 00:00"
-                android:textAlignment="center"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:visibility="gone" />
+            android:divider="?android:dividerHorizontal"
+            android:showDividers="middle">
 
             <!-- TextView to display No Data or Data -->
             <ScrollView
                 android:id="@+id/sliding_up_layout_scrollview"
                 android:layout_width="match_parent"
-                android:layout_height="50dp">
+                android:layout_height="wrap_content"
+                android:minHeight="50dp">
 
                 <TextView
                     android:id="@+id/park_data_text_view"
