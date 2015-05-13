@@ -12,7 +12,9 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-
+/**
+ * The countdown timer that gets set when a user presses the park button.
+ */
 public class countDownTimer extends Service {
 
     CountDownTimer countDown;
@@ -51,6 +53,9 @@ public class countDownTimer extends Service {
         return START_NOT_STICKY;
     }
 
+    /**
+     *
+     */
     public void sendNotification(){
         Intent intent = new Intent(this, countDownTimer.class);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);

@@ -422,6 +422,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
 
+    /**
+     * If the user parked in the app and then closed it, this puts their parked location back on the
+     * map when they re-open the app.
+     */
     public void parkedMarkerLoader() {
         theMap.clear();
         isParked = !parkedDbAccessor.isEmpty();
@@ -504,6 +508,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     }
 
+    /**
+     * Sets up the timer layout in a window with default values
+     */
     public void setUpTimerLayout(){
         int height1;
         if (isData) {
@@ -531,7 +538,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     }
 
-
+    /**
+     * Hides the timer if the option to set it was cancelled
+     * @param view the current view.
+     */
     public void cancel_timer(View view){
         if(isData)
             setUpPanelWithData();
@@ -543,6 +553,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     }
 
+    /**
+     * Sets the timer to start in the background and removes the display of it from the view.
+     * @param view the view the timer is in.
+     */
     public void set_timer(View view){
 
         i = new Intent(this, countDownTimer.class);

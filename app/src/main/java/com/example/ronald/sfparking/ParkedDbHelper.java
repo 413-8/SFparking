@@ -6,8 +6,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 /**
- * Helper for creating and upgrading local SQLite database "Parking_Information.db". Uses string
- * constructors from SqliteSchema to create and upgrade (clear and recreate) the database.
+ * Helper for creating and upgrading local SQLite database "parked.db". Uses string
+ * constructors from SQLiteSchema to create and upgrade (clear and recreate) the database.
  */
 public class ParkedDbHelper extends SQLiteOpenHelper {
 

@@ -67,6 +67,12 @@ public class ParkedLocations extends ActionBarActivity {
 
     }
 
+    /**
+     * Empties a cell in a TableLayout by blacking it out.
+     * @param tableLayout the TableLayout object to alter
+     * @param rowIndex the index of the cell to empty
+     * @param columnIndex the row of the cell to empty
+     */
     public void makeCellEmpty(TableLayout tableLayout, int rowIndex, int columnIndex) {
         // get row from table with rowIndex
         TableRow tableRow = (TableRow) tableLayout.getChildAt(rowIndex);
@@ -78,6 +84,12 @@ public class ParkedLocations extends ActionBarActivity {
         textView.setBackgroundColor(Color.BLACK);
     }
 
+    /**
+     * Sets the text of a cell in a TableLayout object
+     * @param tableLayout the TableLayout object to modify
+     * @param rowIndex the row of the desired cell
+     * @param columnIndex the column of the desired cell
+     */
     public void setHeaderTitle(TableLayout tableLayout, int rowIndex, int columnIndex) {
 
         // get row from table with rowIndex
@@ -89,6 +101,14 @@ public class ParkedLocations extends ActionBarActivity {
         textView.setText("Hello");
     }
 
+    /**
+     * Creates the TableLayout object to be put into the history page in the SavedLocations activity.
+     * @param rv the names of the rows
+     * @param cv the names of the columns
+     * @param rowCount
+     * @param columnCount
+     * @return The TableLayout object filled in with information from the history database.
+     */
     private TableLayout createTableLayout(String[] rv, String[] cv, int rowCount, int columnCount) {
         // 0) Get Display width
         Display display = getWindowManager().getDefaultDisplay();
