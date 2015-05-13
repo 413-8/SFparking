@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -94,12 +95,13 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     private static CustomMapFragment customMapFragment;
     private static SlidingUpPanelLayout sliding_layout_container;
     private static ScrollView sliding_up_layout_scrollview;
-    private static LinearLayout park_save_hist_layout;
+    private static LinearLayout park_save_history_button_bar_layout;
     private static TextView park_data_text_view;
     private static TextView addressAtCenterPin;
  // private static LinearLayout hover_layout; //not needed unless we want to hide it sometimes
     private static ToggleButton parkButton;
     private static Button saveButton;
+    private static Button historyButton;
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // %%%%%%%%%%%%%%%%%%%%%%      ONCREATE     %%%%%%%%%%%%%%%%%%%%%%
@@ -110,10 +112,11 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         customMapFragment = (CustomMapFragment) getSupportFragmentManager().findFragmentById(id.map);
         sliding_layout_container = (SlidingUpPanelLayout) findViewById(id.sliding_layout_container);
         sliding_up_layout_scrollview = (ScrollView) findViewById(id.sliding_up_layout_scrollview);
-        park_save_hist_layout = (LinearLayout) findViewById(id.ParkSaveHist_Layout);
+        park_save_history_button_bar_layout = (LinearLayout) findViewById(id.ParkSaveHist_Layout);
         park_data_text_view = (TextView) findViewById(id.park_data_text_view);
         parkButton = (ToggleButton) findViewById(id.park_button);
         saveButton = (Button) findViewById(id.save_button);
+        historyButton = (Button) findViewById(id.history_button);
         // hover_layout = (LinearLayout) findViewById(id.hoverPin); // not needed unless we want to hide it sometimes
 
 
@@ -307,6 +310,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             queryAndDisplaySfparkData();
             sliding_up_layout_scrollview.setVisibility(View.VISIBLE);
             parkedMarkerLoader();
+            if (savedDbAccessor.isEmpty()) {
+                historyButton.setEnabled(false);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -389,8 +395,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     public void setUpPanelWithData() {
         parkButton.setEnabled(true);
         saveButton.setEnabled(true);
-        sliding_up_layout_scrollview.getLayoutParams().height = 300;
-        sliding_layout_container.setPanelHeight(400);
+        int height1 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 145, getResources().getDisplayMetrics());
+        int height2 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 195, getResources().getDisplayMetrics());
+        sliding_up_layout_scrollview.getLayoutParams().height = height1;
+        sliding_layout_container.setPanelHeight(height2);
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         sliding_layout_container.setTouchEnabled(false);
     }
@@ -401,8 +409,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     public void setUpPanelWithoutData() {
         parkButton.setEnabled(true);
         saveButton.setEnabled(false);
-        sliding_up_layout_scrollview.getLayoutParams().height = 100;
-        sliding_layout_container.setPanelHeight(300);
+        int height1 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+        int height2 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 100, getResources().getDisplayMetrics());
+        sliding_up_layout_scrollview.getLayoutParams().height = height1;
+        sliding_layout_container.setPanelHeight(height2);
         sliding_layout_container.setTouchEnabled(false);
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
@@ -424,6 +434,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             isParked = false;
         }
     }
+
+
 
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // %%%%%%%%%%%%%%%%%%%%%%  BUTTON HANDLERS  %%%%%%%%%%%%%%%%%%%%%%
@@ -488,7 +500,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     public void setUpTimerLayout(){
         sliding_layout_container.setAnchorPoint(0.7f);
-        park_save_hist_layout.setVisibility(LinearLayout.GONE);
+        park_save_history_button_bar_layout.setVisibility(LinearLayout.GONE);
         timer_layout.setVisibility(LinearLayout.VISIBLE);
         sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         sliding_layout_container.setTouchEnabled(false);
@@ -504,7 +516,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         else
             setUpPanelWithoutData();
 
-        park_save_hist_layout.setVisibility(LinearLayout.VISIBLE);
+        park_save_history_button_bar_layout.setVisibility(LinearLayout.VISIBLE);
         timer_layout.setVisibility(LinearLayout.GONE);
 
     }
@@ -541,6 +553,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
             toast.show();
+            historyButton.setEnabled(true);
 
         } else {
             Context context = getApplicationContext();
