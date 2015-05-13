@@ -44,6 +44,7 @@ public class ParkedDbAccessor {
             values.put(SqlEntry.COLUMN_STREET, locationinfo.getStreetName());
             values.put(SqlEntry.COLUMN_ON_OFF, locationinfo.getOnOffStreet());
             values.put(SqlEntry.COLUMN_TIME, locationinfo.getTime());
+            values.put(SqlEntry.COLUMN_RATES,locationinfo.getRates());
             Cursor cursor = database.query(
                     SqlEntry.TABLE_NAME,
                     allColumns,
@@ -82,6 +83,7 @@ public class ParkedDbAccessor {
         values.put(SqlEntry.COLUMN_STREET, newLoc.getStreetName());
         values.put(SqlEntry.COLUMN_ON_OFF, newLoc.getOnOffStreet());
         values.put(SqlEntry.COLUMN_TIME, newLoc.getTime());
+        values.put(SqlEntry.COLUMN_RATES, newLoc.getRates());
         database.update(SqlEntry.TABLE_NAME, values, SqlEntry.COLUMN_ID + " = " + row, null);
     }
 
@@ -192,6 +194,7 @@ public class ParkedDbAccessor {
             location.setStreetName( cursor.getString(cursor.getColumnIndex(SqlEntry.COLUMN_STREET)) );
             location.setOnOffStreet( cursor.getString(cursor.getColumnIndex(SqlEntry.COLUMN_ON_OFF)) );
             location.setTime( cursor.getString(cursor.getColumnIndex(SqlEntry.COLUMN_TIME)) );
+            location.setRates(cursor.getString(cursor.getColumnIndex(SqlEntry.COLUMN_RATES)));
 
             return location;
         }

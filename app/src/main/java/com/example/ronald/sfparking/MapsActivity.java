@@ -460,6 +460,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                 parkLocationInfo.setOnOffStreet("On");
                 parkLocationInfo.setStreetName( /*"\uD83C\uDD7F  " + */ parkLoc.getName());
                 parkLocationInfo.setTime(str);
+                parkLocationInfo.setRates("");
                 parkedDbAccessor.createLocationInfo(parkLocationInfo);
 
 
@@ -547,6 +548,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             parkLocationInfo.setOnOffStreet(parkLoc.getOnOffStreet());
             parkLocationInfo.setStreetName(parkLoc.getName());
             parkLocationInfo.setTime(time);
+            parkLocationInfo.setRates(parkLoc.getRates());
             savedDbAccessor.createLocationInfo(parkLocationInfo);
             Context context = getApplicationContext();
             CharSequence message = "Location Saved \uD83D\uDC4D";
