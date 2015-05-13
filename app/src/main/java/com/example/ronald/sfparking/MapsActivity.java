@@ -257,16 +257,19 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                     // On ACTION_DOWN, switch to default sliding_layout_container
                     // On ACTION_UP, proceed to request and display SFPark data
                     switch (motionEvent.getAction()) {
-                        case 0: //ACTION_DOWN
+                        case MotionEvent.ACTION_DOWN: //ACTION_DOWN
                             //     setUpPanelDefault();
                             //     park_data_text_view.setVisibility(View.GONE);
                             //    addressAtCenterPin.setText(" Getting location ");
-                        case 1: //ACTION_UP
+                            break;
+                        case MotionEvent.ACTION_UP: //ACTION_UP
                             latLngAtCameraCenter = theMap.getCameraPosition().target;
-
                             queryAndDisplayGoogleData();
                             queryAndDisplaySfparkData();
                             sliding_up_layout_scrollview.setVisibility(View.VISIBLE);
+                            break;
+                        default:
+                            break;
                     }
                 }
             });
@@ -551,7 +554,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             Context context = getApplicationContext();
             CharSequence message = "Location Saved \uD83D\uDC4D";
             Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+            //toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
             toast.show();
             historyButton.setEnabled(true);
 
