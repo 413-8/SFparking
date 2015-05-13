@@ -11,6 +11,7 @@ import com.example.ronald.sfparking.R.id;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -20,6 +21,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -503,10 +505,26 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     }
 
     public void setUpTimerLayout(){
-        sliding_layout_container.setAnchorPoint(0.7f);
+        int height1;
+        if (isData) {
+            height1 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 395, getResources().getDisplayMetrics());
+        } else {
+            height1 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 300, getResources().getDisplayMetrics());
+        }
+        int height2 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 250, getResources().getDisplayMetrics());
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int displayHeight = size.y;
+        int displayWidth = size.x;
+        System.out.println("h "+displayHeight+" w "+displayWidth);
+        System.out.println("h2 "+height2);
+        //sliding_layout_container.setAnchorPoint(0.7f);
+        //sliding_layout_container.setPanelHeight(height1);
+        sliding_up_layout_scrollview.getLayoutParams().height = displayHeight - height2 - 50;
         park_save_history_button_bar_layout.setVisibility(LinearLayout.GONE);
         timer_layout.setVisibility(LinearLayout.VISIBLE);
-        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         sliding_layout_container.setTouchEnabled(false);
 
         timerPicker.defaultValues();
