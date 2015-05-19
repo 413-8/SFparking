@@ -15,7 +15,7 @@ import android.widget.Toast;
 /**
  * The countdown timer that gets set when a user presses the park button.
  */
-public class countDownTimer extends Service {
+public class ParkingTimer extends Service {
 
     CountDownTimer countDown;
     long millis;
@@ -57,7 +57,7 @@ public class countDownTimer extends Service {
      *
      */
     public void sendNotification(){
-        Intent intent = new Intent(this, countDownTimer.class);
+        Intent intent = new Intent(this, ParkingTimer.class);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
         builder.setSmallIcon(R.mipmap.ic_launcher);
