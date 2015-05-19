@@ -16,6 +16,9 @@ public class ParkLocation {
     private String address = "";
     private String phone = "";
 
+    /**
+     * Default constructor
+     */
     public ParkLocation () {}
 
     /**
