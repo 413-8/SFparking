@@ -259,7 +259,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="No Timer"
-                    android:onClick="cancel_timer"/>
+                    android:onClick="cancelTimer"/>
 
                 <Button
                     android:id="@+id/set_timer"
@@ -268,7 +268,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Set"
-                    android:onClick="set_timer"/>
+                    android:onClick="setTimer"/>
             </LinearLayout>
 
         </LinearLayout>
