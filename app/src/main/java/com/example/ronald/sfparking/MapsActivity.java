@@ -22,7 +22,6 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -66,8 +65,8 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     /**
      * Stores the current instantiation of the location client in this object
      */
-    public GoogleApiClient mGoogleApiClient; //
-    boolean mUpdatesRequested = false;
+    private GoogleApiClient mGoogleApiClient; //
+    private boolean mUpdatesRequested = false;
     /**
      * the LatLng object that keeps the latitude and longitude of the view center.
      */
@@ -76,21 +75,20 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     private ParkLocation parkLoc;
     private String sfparkQueryUrl;
-    final String radius = "0.010"; // approx. 53ft for accuracy (0.010 miles)
-    String streetName = "";
-    String onOffSt = "";
-    String rates = "";
-    String address = "";
-    String phone = "";
+    private final String radius = "0.010"; // approx. 53ft for accuracy (0.010 miles)
+    private String streetName = "";
+    private String onOffSt = "";
+    private String rates = "";
+    private String address = "";
+    private String phone = "";
     private boolean isParked;
-    private boolean isData;
+    private boolean isDataAtCenter;
 
 
     //Timer layout and reference variables
     private static LinearLayout timer_layout;
-    private static myNumberPicker timerPicker;
-    private Intent i;
-
+    private static TimerPicker timerPicker;
+    private Intent countDownTimerIntent;
 
 
     // UI element reference variables
@@ -100,7 +98,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     private static LinearLayout park_save_history_button_bar_layout;
     private static TextView park_data_text_view;
     private static TextView addressAtCenterPin;
- // private static LinearLayout hover_layout; //not needed unless we want to hide it sometimes
+    // private static LinearLayout hover_layout; //not needed unless we want to hide it sometimes
     private static ToggleButton parkButton;
     private static Button saveButton;
     private static Button historyButton;
@@ -122,9 +120,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         // hover_layout = (LinearLayout) findViewById(id.hoverPin); // not needed unless we want to hide it sometimes
 
 
-        //create timepicker
+        //create timePicker
         timer_layout = (LinearLayout) findViewById(id.timer_layout);
-        timerPicker = new myNumberPicker(this);
+        timerPicker = new TimerPicker(this);
 
         parkedDbAccessor = new ParkedDbAccessor(this);
         parkedDbAccessor.write();
@@ -185,7 +183,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     }
 
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
 
     }
@@ -193,24 +191,13 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     /**
      * Builds the google API client to add the API to the app build.
      */
-    protected synchronized void buildGoogleApiClient() {
+    private synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
     }
-
-    /**
-     * @return the GoogleApiClient object built for the app.
-     */
-    /*protected GoogleApiClient getLocationApiClient() {
-        return new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }*/
 
     /**
      * Creates the google map to be used as the initial view.
@@ -227,9 +214,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             theMap = customMapFragment.getMap();
             theMap.setIndoorEnabled(false);
 
-
-            //mGoogleMap = ((MapFragment) getFragmentManager().findFragmentById(
-            //        R.id.map)).getMap();
 
             // Enabling MyLocation in Google Map
             theMap.setMyLocationEnabled(true);
@@ -284,7 +268,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                     latLngAtCameraCenter = theMap.getCameraPosition().target;
                     //  markerLayout.setVisibility(View.VISIBLE);
 
-                    //setUpPanelWithoutData();
+                    //setupPanelWithoutData();
 
                     // request and parse sfpark api
                     // display appropriate results to user
@@ -325,9 +309,67 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     }
 
     /**
+     * Sets up sliding_layout_container for a location that has no data form SFPark
+     */
+    private void setupPanelWithData() {
+        parkButton.setEnabled(true);
+        saveButton.setEnabled(true);
+        int height1 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 145, getResources().getDisplayMetrics());
+        int height2 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 195, getResources().getDisplayMetrics());
+        sliding_up_layout_scrollview.getLayoutParams().height = height1;
+        sliding_layout_container.setPanelHeight(height2);
+        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        sliding_layout_container.setTouchEnabled(false);
+    }
+
+    /**
+     * Sets up sliding_layout_container for a location that contains data from SFPark
+     */
+    private void setupPanelWithoutData() {
+        parkButton.setEnabled(true);
+        saveButton.setEnabled(false);
+        int height1 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+        int height2 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 100, getResources().getDisplayMetrics());
+        sliding_up_layout_scrollview.getLayoutParams().height = height1;
+        sliding_layout_container.setPanelHeight(height2);
+        sliding_layout_container.setTouchEnabled(false);
+        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+    }
+
+    /**
+     * Sets up the timer layout in a window with default values
+     */
+    private void setupPanelWithTimerPickerLayout() {
+        int height1;
+        if (isDataAtCenter) {
+            height1 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 395, getResources().getDisplayMetrics());
+        } else {
+            height1 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 300, getResources().getDisplayMetrics());
+        }
+        int height2 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 250, getResources().getDisplayMetrics());
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int displayHeight = size.y;
+        int displayWidth = size.x;
+        System.out.println("h " + displayHeight + " w " + displayWidth);
+        System.out.println("h2 " + height2);
+        //sliding_layout_container.setAnchorPoint(0.7f);
+        //sliding_layout_container.setPanelHeight(height1);
+        sliding_up_layout_scrollview.getLayoutParams().height = displayHeight - height2 - 50;
+        park_save_history_button_bar_layout.setVisibility(LinearLayout.GONE);
+        timer_layout.setVisibility(LinearLayout.VISIBLE);
+        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+        sliding_layout_container.setTouchEnabled(false);
+
+        timerPicker.defaultValues();
+
+    }
+
+    /**
      * retrieves data about the center location asynchronously
      */
-    public void queryAndDisplayGoogleData() {
+    private void queryAndDisplayGoogleData() {
         try {
             new GetLocationAsync(latLngAtCameraCenter.latitude,
                     latLngAtCameraCenter.longitude)
@@ -342,23 +384,23 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
      * Sets up the information panel by sending a query to the
      * SFPark server.
      */
-    public void queryAndDisplaySfparkData() {
+    private void queryAndDisplaySfparkData() {
         try {
             makeURLString(Double.toString(latLngAtCameraCenter.latitude),
                     Double.toString(latLngAtCameraCenter.longitude),
                     radius);
-            parkLoc = new httpRequest(getApplicationContext()).execute(sfparkQueryUrl).get();
+            parkLoc = new TheHttpRequest(getApplicationContext()).execute(sfparkQueryUrl).get();
             streetName = parkLoc.getName();
             if (streetName.equals("No Data")) {
                 park_data_text_view.setText("\tNo Data");
                 // Set up panel with No data
-                setUpPanelWithoutData();
-                isData = false;
+                setupPanelWithoutData();
+                isDataAtCenter = false;
             } else {
                 onOffSt = parkLoc.getOnOffStreet();
                 rates = parkLoc.getRates();
 
-                if(onOffSt.equals("Meter")) {
+                if (onOffSt.equals("Meter")) {
                     park_data_text_view.setText("\tStreet Name: "
                             + streetName + "\n\tType: "
                             + onOffSt
@@ -368,14 +410,14 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                     address = parkLoc.getAddress();
                     phone = parkLoc.getPhone();
                     park_data_text_view.setText("\tName: " + streetName +
-                                                "\n\tType: " + onOffSt +
-                                                "\n\tAddress: " + address +
-                                                "\n\tPhone: " + phone +
-                                                "\n\tRates:\n" + rates);
+                            "\n\tType: " + onOffSt +
+                            "\n\tAddress: " + address +
+                            "\n\tPhone: " + phone +
+                            "\n\tRates:\n" + rates);
                 }
                 // Set up panel when info is available
-                setUpPanelWithData();
-                isData = true;
+                setupPanelWithData();
+                isDataAtCenter = true;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -394,48 +436,21 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         sliding_layout_container.setTouchEnabled(false);
     }*/
 
-    /**
-     * Sets up sliding_layout_container for a location that has no data form SFPark
-     */
-    public void setUpPanelWithData() {
-        parkButton.setEnabled(true);
-        saveButton.setEnabled(true);
-        int height1 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 145, getResources().getDisplayMetrics());
-        int height2 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 195, getResources().getDisplayMetrics());
-        sliding_up_layout_scrollview.getLayoutParams().height = height1;
-        sliding_layout_container.setPanelHeight(height2);
-        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-        sliding_layout_container.setTouchEnabled(false);
-    }
-
-    /**
-     * Sets up sliding_layout_container for a location that contains data from SFPark
-     */
-    public void setUpPanelWithoutData() {
-        parkButton.setEnabled(true);
-        saveButton.setEnabled(false);
-        int height1 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
-        int height2 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 100, getResources().getDisplayMetrics());
-        sliding_up_layout_scrollview.getLayoutParams().height = height1;
-        sliding_layout_container.setPanelHeight(height2);
-        sliding_layout_container.setTouchEnabled(false);
-        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-    }
 
     /**
      * If the user parked in the app and then closed it, this puts their parked location back on the
      * map when they re-open the app.
      */
-    public void parkedMarkerLoader() {
+    private void parkedMarkerLoader() {
         theMap.clear();
         isParked = !parkedDbAccessor.isEmpty();
         if (isParked) {
             LatLng parkedLatLng = new LatLng(parkedDbAccessor.getParkedLocation().getLatitude(),
                     parkedDbAccessor.getParkedLocation().getLongitude());
             theMap.addMarker(new MarkerOptions()
-                    .position(parkedLatLng)
-                    .title("I parked here")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                            .position(parkedLatLng)
+                            .title("I parked here")
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
             );
             parkButton.setText("Unpark");
             parkButton.setChecked(true);
@@ -445,9 +460,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
     }
 
 
-
     // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     // %%%%%%%%%%%%%%%%%%%%%%  BUTTON HANDLERS  %%%%%%%%%%%%%%%%%%%%%%
+
     /**
      * Park Button.  creates a location object with the given latLngAtCameraCenter and stores it
      * into an SQLite database on the device.  Also adds a new marker on theMap after clearing any
@@ -458,7 +473,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
         if (!isParked) {
             if (latLngAtCameraCenter != null) {
 
-                setUpTimerLayout();
+                setupPanelWithTimerPickerLayout();
 
                 Calendar calendar = Calendar.getInstance();
                 Date d = calendar.getTime();
@@ -467,11 +482,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                 parkLocationInfo.setLatitude(latLngAtCameraCenter.latitude);
                 parkLocationInfo.setLongitude(latLngAtCameraCenter.longitude);
                 parkLocationInfo.setOnOffStreet("On");
-                parkLocationInfo.setStreetName( /*"\uD83C\uDD7F  " + */ parkLoc.getName());
+                parkLocationInfo.setStreetName(parkLoc.getName());
                 parkLocationInfo.setTime(str);
                 parkLocationInfo.setRates("");
                 parkedDbAccessor.createLocationInfo(parkLocationInfo);
-
 
                 theMap.addMarker(new MarkerOptions()
                                 .position(latLngAtCameraCenter)
@@ -482,13 +496,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
                 isParked = true;
                 parkButton.setText("Unpark");
                 parkButton.setChecked(true);
-                //parkButton.getBackground().setColorFilter(0xFF00FF00, PorterDuff.Mode.MULTIPLY);
             } else {
                 Context context = getApplicationContext();
-                CharSequence text = "Current Location Not Available!!!";
-                int duration = Toast.LENGTH_SHORT;
-
-                Toast toast = Toast.makeText(context, text, duration);
+                Toast toast = Toast.makeText(context, "Current Location Not Available!!!", Toast.LENGTH_SHORT);
                 toast.show();
             }
         } else {
@@ -498,55 +508,28 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             parkButton.setText("Park");
             parkButton.setChecked(false);
 
-            if(i != null)
-            {Context context = getApplicationContext();
+            if (countDownTimerIntent != null) {
+                Context context = getApplicationContext();
+                stopService(countDownTimerIntent);
+                countDownTimerIntent = null;
                 Toast toast = Toast.makeText(context, "Timer Cancelled", Toast.LENGTH_SHORT);
                 toast.show();
-                stopService(i); i=null;}
+            }
 
         }
-
-    }
-
-    /**
-     * Sets up the timer layout in a window with default values
-     */
-    public void setUpTimerLayout(){
-        int height1;
-        if (isData) {
-            height1 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 395, getResources().getDisplayMetrics());
-        } else {
-            height1 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 300, getResources().getDisplayMetrics());
-        }
-        int height2 = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 250, getResources().getDisplayMetrics());
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int displayHeight = size.y;
-        int displayWidth = size.x;
-        System.out.println("h "+displayHeight+" w "+displayWidth);
-        System.out.println("h2 "+height2);
-        //sliding_layout_container.setAnchorPoint(0.7f);
-        //sliding_layout_container.setPanelHeight(height1);
-        sliding_up_layout_scrollview.getLayoutParams().height = displayHeight - height2 - 50;
-        park_save_history_button_bar_layout.setVisibility(LinearLayout.GONE);
-        timer_layout.setVisibility(LinearLayout.VISIBLE);
-        sliding_layout_container.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-        sliding_layout_container.setTouchEnabled(false);
-
-        timerPicker.defaultValues();
 
     }
 
     /**
      * Hides the timer if the option to set it was cancelled
+     *
      * @param view the current view.
      */
-    public void cancel_timer(View view){
-        if(isData)
-            setUpPanelWithData();
+    public void cancelTimer(View view) {
+        if (isDataAtCenter)
+            setupPanelWithData();
         else
-            setUpPanelWithoutData();
+            setupPanelWithoutData();
 
         park_save_history_button_bar_layout.setVisibility(LinearLayout.VISIBLE);
         timer_layout.setVisibility(LinearLayout.GONE);
@@ -555,15 +538,16 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     /**
      * Sets the timer to start in the background and removes the display of it from the view.
+     *
      * @param view the view the timer is in.
      */
-    public void set_timer(View view){
+    public void setTimer(View view) {
 
-        i = new Intent(this, countDownTimer.class);
-        i.putExtra("millis", timerPicker.getMilliseconds());
+        countDownTimerIntent = new Intent(this, ParkingTimer.class);
+        countDownTimerIntent.putExtra("millis", timerPicker.getMilliseconds());
 
-        startService(i);
-        cancel_timer(view);
+        startService(countDownTimerIntent);
+        cancelTimer(view);
     }
 
     /**
@@ -605,33 +589,37 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
 
     /**
      * History Button
-     * starts the history table activity .SavedLocations
+     * starts the history table activity .SavedLocationsActivity
      */
     public void historyButton(View view) {
 
-        startActivity(new Intent(".SavedLocations"));
+        startActivity(new Intent(".SavedLocationsActivity"));
     }
 
+    /**
+     * Allows the user to quickly zoom in or out for a more precise view an overview.
+     *
+     * @param view
+     */
     public void zoomButton(View view) {
         float zoom = theMap.getCameraPosition().zoom;
-        if(zoom==18.0f)
-        {
-            theMap.animateCamera(CameraUpdateFactory.zoomTo( 15.0f ));
-        }else
-            theMap.animateCamera(CameraUpdateFactory.zoomTo( 18.0f ));
+        if (zoom == 18.0f) {
+            theMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
+        } else
+            theMap.animateCamera(CameraUpdateFactory.zoomTo(18.0f));
     }
 
     /**
      * gives sfparkQueryUrl a query string from URLMaker using the given params
-     * @param latitude the latitude to include in the string
+     *
+     * @param latitude  the latitude to include in the string
      * @param longitude the longitude to include in the string
-     * @param radius the radius to include in the string.
+     * @param radius    the radius to include in the string.
      */
     private void makeURLString(String latitude, String longitude, String radius) {
         URLMaker temp = URLMaker.getInstance();
         sfparkQueryUrl = temp.makeURL(latitude, longitude, radius);
     }
-
 
 
     //empty inherited methods
