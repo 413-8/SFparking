@@ -20,7 +20,6 @@ import java.util.ArrayList;
  */
 public class SFParkXmlParser {
 
-    static ArrayList<RateInfo> rates = new ArrayList<>();
     //no namespaces
     private static final String ns = null;
 
@@ -87,6 +86,8 @@ public class SFParkXmlParser {
         String locName = "";
         String desc = "";
         String phone = "";
+        ArrayList<RateInfo> rates = new ArrayList<>();
+
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
