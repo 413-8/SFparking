@@ -21,7 +21,6 @@ import java.net.URL;
 public class httpRequest extends AsyncTask<String, Void, ParkLocation>{
 
     private Context context;
-    ParkLocation parkLoc = null;
 
     public httpRequest(Context context){
         this.context = context;
@@ -71,6 +70,7 @@ public class httpRequest extends AsyncTask<String, Void, ParkLocation>{
     private ParkLocation loadXmlFromNetwork(String urlString)
             throws XmlPullParserException, IOException {
         InputStream stream = null;
+        ParkLocation parkLoc;
 
         try {
             stream = downloadUrl(urlString);
