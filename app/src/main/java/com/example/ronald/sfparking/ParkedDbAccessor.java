@@ -26,12 +26,6 @@ public class ParkedDbAccessor {
 
         public void write() {database = dbHelper.getWritableDatabase();}
 
-        public void open() throws SQLException {
-            database = dbHelper.getWritableDatabase();
-        }
-
-        public void close() {dbHelper.close();}
-
     /**
      * takes information from a ParkLocationInfo object and stores it as a new row in the table.
      * maximum number of stored entries:5
@@ -120,8 +114,8 @@ public class ParkedDbAccessor {
         }
 
     /**
-     * gets all locations in the database table as a stack with the newest entry on top.
-     * @return a stack of all of the locations in the database history table.
+     * Returns the last parked location in the parked location database.g
+     * @return last parked location in the parked location database.
      */
         public ParkLocationInfo getParkedLocation() {
             /*

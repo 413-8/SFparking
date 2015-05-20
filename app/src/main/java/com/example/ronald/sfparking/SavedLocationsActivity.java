@@ -19,69 +19,18 @@ import java.util.Stack;
  */
 public class SavedLocationsActivity extends ActionBarActivity {
     private SavedDbAccessor savedDbAccessor;
-/*    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_saved_locations);
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_saved_locations, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }*/
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         savedDbAccessor = new SavedDbAccessor(this);
-        savedDbAccessor.open();
+        savedDbAccessor.write();
 
         ScrollView sv = new ScrollView(this);
         TableLayout tableLayout = createTableLayout();
         sv.addView(tableLayout);
         setContentView(sv);
 
-    }
-
-    public void makeCellEmpty(TableLayout tableLayout, int rowIndex, int columnIndex) {
-        // get row from table with rowIndex
-        TableRow tableRow = (TableRow) tableLayout.getChildAt(rowIndex);
-
-        // get cell from row with columnIndex
-        TextView textView = (TextView) tableRow.getChildAt(columnIndex);
-
-        // make it black
-        textView.setBackgroundColor(Color.BLACK);
-    }
-
-    public void setHeaderTitle(TableLayout tableLayout, int rowIndex, int columnIndex) {
-
-        // get row from table with rowIndex
-        TableRow tableRow = (TableRow) tableLayout.getChildAt(rowIndex);
-
-        // get cell from row with columnIndex
-        TextView textView = (TextView) tableRow.getChildAt(columnIndex);
-
-        textView.setText("Hello");
     }
 
     private TableLayout createTableLayout() {

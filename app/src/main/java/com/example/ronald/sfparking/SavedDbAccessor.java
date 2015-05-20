@@ -34,14 +34,6 @@ public class SavedDbAccessor {
         database = dbHelper.getWritableDatabase();
     }
 
-    public void open() throws SQLException {
-        database = dbHelper.getWritableDatabase();
-    }
-
-    public void close() {
-        dbHelper.close();
-    }
-
     /**
      * takes information from a ParkLocationInfo object and stores it as a new row in the table.
      * maximum number of stored entries:5
