@@ -389,7 +389,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener,
             makeURLString(Double.toString(latLngAtCameraCenter.latitude),
                     Double.toString(latLngAtCameraCenter.longitude),
                     radius);
-            parkLoc = new TheHttpRequest(getApplicationContext()).execute(sfparkQueryUrl).get();
+            parkLoc = new HttpRequest(getApplicationContext()).execute(sfparkQueryUrl).get();
             streetName = parkLoc.getName();
             if (streetName.equals("No Data")) {
                 park_data_text_view.setText("\tNo Data");
