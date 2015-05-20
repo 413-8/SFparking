@@ -18,11 +18,11 @@ import java.net.URL;
  *  makes an http request through the internet and reads the text on that page into a buffer.
  *  implemented by extending the AsyncTask class, so that it can run asynchronously.
  */
-public class httpRequest extends AsyncTask<String, Void, ParkLocation>{
+public class HttpRequest extends AsyncTask<String, Void, ParkLocation>{
 
     private Context context;
 
-    public httpRequest(Context context){
+    public HttpRequest(Context context){
         this.context = context;
     }
 
